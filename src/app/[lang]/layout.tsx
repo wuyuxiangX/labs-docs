@@ -17,7 +17,7 @@ export default async function LangLayout({
         locale: lang,
         locales: i18n.languages.map((l) => ({
           locale: l,
-          name: l === 'zh' ? '中文' : 'English',
+          name: l === 'zh' ? '🇨🇳 中文' : '🇬🇧 English',
         })),
       }}
     >
