@@ -1,0 +1,858 @@
+openapi: 3.0.3
+info:
+  title: MindVerse Labs API
+  description: |
+    MindVerse Labs API provides SecondMe digital avatar capabilities, supporting OAuth2 and API Key authentication.
+
+    ## Authentication
+
+    The API supports two authentication methods:
+
+    ### API Key
+    Add the API Key to the `Authorization` header:
+    ```
+    Authorization: Bearer lba_ak_your_api_key
+    ```
+
+    ### OAuth2 Access Token
+    After obtaining an Access Token through OAuth2 flow:
+    ```
+    Authorization: Bearer lba_at_your_access_token
+    ```
+
+    ## Token Prefixes
+
+    | Token Type | Prefix | Validity |
+    |------------|--------|----------|
+    | API Key | `lba_ak_` | Configurable |
+    | Authorization Code | `lba_ac_` | 5 minutes |
+    | Access Token | `lba_at_` | 2 hours |
+    | Refresh Token | `lba_rt_` | 30 days |
+  version: 1.0.0
+  contact:
+    name: MindVerse Labs
+    url: https://app.mindos.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://app.mindos.com/gate/lab
+    description: Production server
+
+tags:
+  - name: OAuth2
+    description: OAuth2 authorization code flow endpoints
+  - name: SecondMe
+    description: SecondMe user information and chat endpoints
+
+paths:
+  /api/oauth/authorize/external:
+    post:
+      tags:
+        - OAuth2
+      summary: User Authorization
+      description: |
+        Initiate OAuth2 authorization request to obtain an authorization code.
+        Requires user to be logged in (Bearer Token).
+      operationId: authorizeExternal
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizeRequest'
+            example:
+              clientId: "your_client_id"
+              redirectUri: "https://your-app.com/callback"
+              scope:
+                - "user.info.name"
+                - "user.info.avatar"
+                - "chat"
+              state: "random_state_for_csrf_protection"
+      responses:
+        '200':
+          description: Authorization successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizeResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidScope:
+                  summary: Invalid scope
+                  value:
+                    code: 400
+                    message: "Invalid scope"
+                    error_code: "oauth2.scope.invalid"
+                redirectUriMismatch:
+                  summary: Redirect URI mismatch
+                  value:
+                    code: 400
+                    message: "Redirect URI does not match"
+                    error_code: "oauth2.redirect_uri.mismatch"
+        '404':
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 404
+                message: "Application not found"
+                error_code: "oauth2.application.not_found"
+
+  /api/oauth/token/code:
+    post:
+      tags:
+        - OAuth2
+      summary: Exchange Code for Token
+      description: Exchange authorization code for Access Token and Refresh Token.
+      operationId: tokenCode
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenCodeRequest'
+      responses:
+        '200':
+          description: Token exchange successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidGrantType:
+                  summary: Invalid grant type
+                  value:
+                    code: 400
+                    message: "Invalid grant_type"
+                    error_code: "oauth2.grant_type.invalid"
+                invalidCode:
+                  summary: Invalid authorization code
+                  value:
+                    code: 400
+                    message: "Authorization code is invalid"
+                    error_code: "oauth2.code.invalid"
+                expiredCode:
+                  summary: Expired authorization code
+                  value:
+                    code: 400
+                    message: "Authorization code has expired"
+                    error_code: "oauth2.code.expired"
+                usedCode:
+                  summary: Already used authorization code
+                  value:
+                    code: 400
+                    message: "Authorization code has already been used"
+                    error_code: "oauth2.code.used"
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 401
+                message: "Client Secret does not match"
+                error_code: "oauth2.client.secret_mismatch"
+
+  /api/oauth/token/refresh:
+    post:
+      tags:
+        - OAuth2
+      summary: Refresh Token
+      description: |
+        Use Refresh Token to obtain a new Access Token.
+
+        **Note**: Each refresh generates a new Refresh Token, and the old Refresh Token becomes invalid (Token Rotation).
+      operationId: tokenRefresh
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          description: Token refresh successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidGrantType:
+                  summary: Invalid grant type
+                  value:
+                    code: 400
+                    message: "Invalid grant_type"
+                    error_code: "oauth2.grant_type.invalid"
+                invalidRefreshToken:
+                  summary: Invalid refresh token
+                  value:
+                    code: 400
+                    message: "Refresh Token is invalid"
+                    error_code: "oauth2.refresh_token.invalid"
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                expiredRefreshToken:
+                  summary: Expired refresh token
+                  value:
+                    code: 401
+                    message: "Refresh Token has expired"
+                    error_code: "oauth2.refresh_token.expired"
+                revokedRefreshToken:
+                  summary: Revoked refresh token
+                  value:
+                    code: 401
+                    message: "Refresh Token has been revoked"
+                    error_code: "oauth2.refresh_token.revoked"
+                secretMismatch:
+                  summary: Client secret mismatch
+                  value:
+                    code: 401
+                    message: "Client Secret does not match"
+                    error_code: "oauth2.client.secret_mismatch"
+
+  /api/secondme/user/info:
+    get:
+      tags:
+        - SecondMe
+      summary: Get User Info
+      description: |
+        Get authorized user's basic information. Returned fields depend on authorized permissions.
+
+        **Required Permissions**: At least one of `user.info.*` permissions.
+      operationId: getUserInfo
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 401
+                message: "API Key is invalid or expired"
+                error_code: "apikey.auth.invalid"
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 403
+                message: "Missing required permission"
+                error_code: "apikey.permission.denied"
+
+  /api/secondme/user/softmemory:
+    get:
+      tags:
+        - SecondMe
+      summary: Get User Soft Memories
+      description: |
+        Get user's soft memory data (personal knowledge base).
+
+        **Required Permission**: `user.info.softmemory`
+      operationId: getUserSoftMemory
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoftMemoryResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 403
+                message: "Missing user.info.softmemory permission"
+                error_code: "apikey.permission.denied"
+
+  /api/secondme/chat/stream:
+    post:
+      tags:
+        - SecondMe
+      summary: Streaming Chat
+      description: |
+        Have streaming conversations as the user's AI avatar.
+
+        **Required Permission**: `chat`
+
+        Response is `text/event-stream` (Server-Sent Events).
+      operationId: chatStream
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-App-Id
+          in: header
+          description: Application ID, defaults to `general`
+          required: false
+          schema:
+            type: string
+            default: general
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatStreamRequest'
+            example:
+              message: "Hello, introduce yourself"
+              systemPrompt: "Please reply in a friendly tone"
+      responses:
+        '200':
+          description: Streaming response
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: |
+                event: session
+                data: {"sessionId": "labs_sess_a1b2c3d4e5f6"}
+
+                data: {"choices": [{"delta": {"content": "Hello"}}]}
+
+                data: {"choices": [{"delta": {"content": "! I am"}}]}
+
+                data: {"choices": [{"delta": {"content": " your AI avatar"}}]}
+
+                data: [DONE]
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 403
+                message: "Missing chat permission"
+                error_code: "apikey.permission.denied"
+        '500':
+          description: Streaming error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 500
+                message: "Streaming response error"
+                error_code: "secondme.stream.error"
+
+  /api/secondme/chat/session/list:
+    get:
+      tags:
+        - SecondMe
+      summary: Get Session List
+      description: |
+        Get user's chat session list.
+
+        **Required Permission**: `chat`
+      operationId: getSessionList
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: appId
+          in: query
+          description: Filter by application ID
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/secondme/chat/session/messages:
+    get:
+      tags:
+        - SecondMe
+      summary: Get Session Messages
+      description: |
+        Get message history for a specific session.
+
+        **Required Permission**: `chat`
+      operationId: getSessionMessages
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sessionId
+          in: query
+          description: Session ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionMessagesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 403
+                message: "Not authorized to access this session"
+                error_code: "secondme.session.unauthorized"
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 404
+                message: "Session not found"
+                error_code: "secondme.session.not_found"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Use API Key (`lba_ak_...`) or OAuth2 Access Token (`lba_at_...`)
+
+  schemas:
+    # OAuth2 Schemas
+    AuthorizeRequest:
+      type: object
+      required:
+        - clientId
+        - redirectUri
+        - scope
+      properties:
+        clientId:
+          type: string
+          description: Application's Client ID
+        redirectUri:
+          type: string
+          format: uri
+          description: Callback URL after authorization
+        scope:
+          type: array
+          items:
+            type: string
+          description: List of requested permissions
+        state:
+          type: string
+          description: CSRF protection parameter, returned as-is
+
+    AuthorizeResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        data:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Authorization code, valid for 5 minutes
+              example: "lba_ac_xxxxx..."
+            state:
+              type: string
+              description: The state parameter returned as-is
+              example: "random_state_for_csrf_protection"
+
+    TokenCodeRequest:
+      type: object
+      required:
+        - grant_type
+        - code
+        - redirect_uri
+        - client_id
+        - client_secret
+      properties:
+        grant_type:
+          type: string
+          enum:
+            - authorization_code
+          description: Fixed value `authorization_code`
+        code:
+          type: string
+          description: Authorization code from authorization step
+        redirect_uri:
+          type: string
+          format: uri
+          description: Must match the value in authorization request
+        client_id:
+          type: string
+          description: Application's Client ID
+        client_secret:
+          type: string
+          description: Application's Client Secret
+
+    TokenRefreshRequest:
+      type: object
+      required:
+        - grant_type
+        - refresh_token
+        - client_id
+        - client_secret
+      properties:
+        grant_type:
+          type: string
+          enum:
+            - refresh_token
+          description: Fixed value `refresh_token`
+        refresh_token:
+          type: string
+          description: Previously obtained Refresh Token
+        client_id:
+          type: string
+          description: Application's Client ID
+        client_secret:
+          type: string
+          description: Application's Client Secret
+
+    TokenResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+              description: Access token, valid for 2 hours
+              example: "lba_at_xxxxx..."
+            refreshToken:
+              type: string
+              description: Refresh token, valid for 30 days
+              example: "lba_rt_xxxxx..."
+            tokenType:
+              type: string
+              enum:
+                - Bearer
+              description: Token type
+            expiresIn:
+              type: integer
+              description: Access Token validity period (seconds)
+              example: 7200
+            scope:
+              type: array
+              items:
+                type: string
+              description: List of granted permissions
+              example:
+                - "user.info.name"
+                - "user.info.avatar"
+                - "chat"
+
+    # SecondMe Schemas
+    UserInfoResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            userId:
+              type: integer
+              description: User ID (always returned)
+              example: 12345
+            name:
+              type: string
+              description: User's name (requires user.info.name)
+              example: "Username"
+            email:
+              type: string
+              format: email
+              description: User's email (requires user.info.email)
+              example: "user@example.com"
+            phone:
+              type: string
+              description: User's phone (requires user.info.phone)
+              example: "+8613800138000"
+            avatar:
+              type: string
+              format: uri
+              description: Avatar URL (requires user.info.avatar)
+              example: "https://cdn.example.com/avatar.jpg"
+            bio:
+              type: string
+              description: Personal bio (requires user.info.bio)
+              example: "Personal bio"
+            selfIntroduction:
+              type: string
+              description: Self introduction (requires user.info.selfIntroduction)
+              example: "Self introduction content"
+            voiceId:
+              type: string
+              description: Voice ID (requires user.info.voiceId)
+              example: "voice_001"
+            profileCompleteness:
+              type: number
+              format: float
+              description: Profile completeness percentage (requires user.info.profileCompleteness)
+              example: 85.5
+
+    SoftMemoryResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            softMemories:
+              type: array
+              items:
+                $ref: '#/components/schemas/SoftMemory'
+            total:
+              type: integer
+              description: Total count
+              example: 2
+
+    SoftMemory:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Soft memory ID
+          example: 1
+        userId:
+          type: integer
+          description: User ID
+          example: 12345
+        factActor:
+          type: string
+          description: Fact subject, fixed as `self`
+          example: "self"
+        factContent:
+          type: string
+          description: Fact content
+          example: "Enjoys reading science fiction novels"
+        createTime:
+          type: string
+          format: date-time
+          description: Creation time (ISO 8601)
+          example: "2024-01-15T10:30:00Z"
+        updateTime:
+          type: string
+          format: date-time
+          description: Update time (ISO 8601)
+          example: "2024-01-15T10:30:00Z"
+
+    ChatStreamRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: User message content
+        sessionId:
+          type: string
+          description: Session ID, auto-generated if not provided
+        appId:
+          type: string
+          description: Application ID, takes priority over Header
+        systemPrompt:
+          type: string
+          description: System prompt, only effective on first request of new session
+        receiverUserId:
+          type: integer
+          description: Receiver user ID (reserved field)
+
+    SessionListResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            sessions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Session'
+
+    Session:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Session ID
+          example: "labs_sess_a1b2c3d4"
+        appId:
+          type: string
+          description: Application ID
+          example: "general"
+        lastMessage:
+          type: string
+          description: Last message preview (truncated to 50 chars)
+          example: "Hello, introduce yourself..."
+        lastUpdateTime:
+          type: string
+          format: date-time
+          description: Last update time (ISO 8601)
+          example: "2024-01-20T15:30:00Z"
+        messageCount:
+          type: integer
+          description: Message count
+          example: 10
+
+    SessionMessagesResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            sessionId:
+              type: string
+              description: Session ID
+              example: "labs_sess_a1b2c3d4"
+            messages:
+              type: array
+              items:
+                $ref: '#/components/schemas/Message'
+
+    Message:
+      type: object
+      properties:
+        messageId:
+          type: string
+          description: Message ID
+          example: "msg_001"
+        role:
+          type: string
+          enum:
+            - system
+            - user
+            - assistant
+          description: "Role: system/user/assistant"
+        content:
+          type: string
+          description: Message content
+          example: "Hello, introduce yourself"
+        senderUserId:
+          type: integer
+          description: Sender user ID
+          example: 12345
+        receiverUserId:
+          type: integer
+          nullable: true
+          description: Receiver user ID (reserved)
+        createTime:
+          type: string
+          format: date-time
+          description: Creation time (ISO 8601)
+          example: "2024-01-20T15:00:05Z"
+
+    # Common Schemas
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP status code
+          example: 400
+        message:
+          type: string
+          description: Human-readable error description
+          example: "Error description"
+        error_code:
+          type: string
+          description: Machine-readable error code
+          example: "module.resource.reason"

@@ -1,0 +1,163 @@
+---
+title: API Key Guide
+description: API Key is the simplest way to access SecondMe API, ideal for server-side calls
+---
+
+API Key is the simplest way to access SecondMe API, ideal for server-side calls and backend services.
+
+## Getting an API Key
+
+1. Log in to [MindVerse Developer Console](https://app.mindos.com)
+2. Navigate to "API Key Management"
+3. Click "Create API Key"
+4. Select required permissions
+5. Set expiration time (optional)
+6. Save the generated API Key
+
+> **Important**: The API Key is only displayed once at creation. Please save it securely. If lost, you need to create a new one.
+
+## API Key Format
+
+All API Keys are prefixed with `lba_ak_`:
+
+```
+lba_ak_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0...
+```
+
+## Using API Key
+
+Add the API Key to the `Authorization` header in HTTP requests:
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
+  -H "Authorization: Bearer lba_ak_your_api_key_here"
+```
+
+### Python Example
+
+```python
+import requests
+
+api_key = "lba_ak_your_api_key_here"
+headers = {
+    "Authorization": f"Bearer {api_key}"
+}
+
+response = requests.get(
+    "https://app.mindos.com/gate/lab/api/secondme/user/info",
+    headers=headers
+)
+
+print(response.json())
+```
+
+### JavaScript Example
+
+```javascript
+const apiKey = "lba_ak_your_api_key_here";
+
+const response = await fetch(
+  "https://app.mindos.com/gate/lab/api/secondme/user/info",
+  {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  }
+);
+
+const data = await response.json();
+console.log(data);
+```
+
+## Permission Management
+
+You need to specify permissions when creating an API Key. Only authorized permissions can access corresponding API features.
+
+### Permission List
+
+| Scope | Description | Accessible Endpoints |
+|-------|-------------|---------------------|
+| `user.info.name` | User's name | GET /api/secondme/user/info |
+| `user.info.email` | User's email | GET /api/secondme/user/info |
+| `user.info.phone` | User's phone | GET /api/secondme/user/info |
+| `user.info.avatar` | User's avatar | GET /api/secondme/user/info |
+| `user.info.bio` | User's bio | GET /api/secondme/user/info |
+| `user.info.selfIntroduction` | Self introduction | GET /api/secondme/user/info |
+| `user.info.softmemory` | Soft memories | GET /api/secondme/user/softmemory |
+| `chat` | Chat functionality | POST /api/secondme/chat/stream, GET /api/secondme/chat/session/* |
+| `*` | All permissions | All endpoints |
+
+### Permission Check Rules
+
+- Accessing `/api/secondme/user/info` requires at least one `user.info.*` permission
+- Accessing `/api/secondme/user/softmemory` requires `user.info.softmemory` permission
+- Accessing chat-related endpoints requires `chat` permission
+- Wildcard `*` grants all permissions
+
+## Security Best Practices
+
+### 1. Never Expose API Key in Client-Side Code
+
+API Keys should only be used server-side. Never expose them in frontend code, mobile apps, or any place visible to users.
+
+```javascript
+// Bad example: Using API Key in frontend
+const apiKey = "lba_ak_xxx"; // Don't do this!
+
+// Good practice: Proxy through backend
+fetch("/api/proxy/user-info"); // Backend holds the API Key
+```
+
+### 2. Use Environment Variables
+
+```bash
+# .env file
+MINDVERSE_API_KEY=lba_ak_your_api_key_here
+```
+
+```python
+import os
+api_key = os.environ.get("MINDVERSE_API_KEY")
+```
+
+### 3. Limit API Key Permissions
+
+Only request necessary permissions. Follow the principle of least privilege.
+
+### 4. Rotate API Keys Regularly
+
+Regularly rotate API Keys, especially when:
+- Team members leave
+- Suspected API Key compromise
+- Regular security audits
+
+### 5. Monitor API Key Usage
+
+Regularly check API Key usage logs and address anomalies promptly.
+
+## Error Handling
+
+### Authentication Failed
+
+```json
+{
+  "code": 401,
+  "message": "API Key is invalid or expired",
+  "error_code": "apikey.auth.invalid"
+}
+```
+
+### Permission Denied
+
+```json
+{
+  "code": 403,
+  "message": "Missing required permission: chat",
+  "error_code": "apikey.permission.denied"
+}
+```
+
+## Next Steps
+
+- [SecondMe API Reference](/en/docs/api-reference/secondme) - View available API endpoints
+- [Error Codes Reference](/en/docs/errors) - Understand all error codes

@@ -1,0 +1,163 @@
+---
+title: API Key 使用指南
+description: API Key 是访问 SecondMe API 的最简单方式，适合服务端调用和后台服务
+---
+
+API Key 是访问 SecondMe API 的最简单方式，适合服务端调用和后台服务。
+
+## 获取 API Key
+
+1. 登录 [MindVerse SecondMe后台](https://app.mindos.com)
+2. 进入「API Key 管理」页面
+3. 点击「创建 API Key」
+4. 选择所需权限
+5. 设置过期时间（可选）
+6. 保存生成的 API Key
+
+> **重要**: API Key 只在创建时显示一次，请妥善保存。如果丢失，需要重新创建。
+
+## API Key 格式
+
+所有 API Key 都以 `lba_ak_` 为前缀：
+
+```
+lba_ak_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0...
+```
+
+## 使用 API Key
+
+在 HTTP 请求的 `Authorization` 头中添加 API Key：
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
+  -H "Authorization: Bearer lba_ak_your_api_key_here"
+```
+
+### Python 示例
+
+```python
+import requests
+
+api_key = "lba_ak_your_api_key_here"
+headers = {
+    "Authorization": f"Bearer {api_key}"
+}
+
+response = requests.get(
+    "https://app.mindos.com/gate/lab/api/secondme/user/info",
+    headers=headers
+)
+
+print(response.json())
+```
+
+### JavaScript 示例
+
+```javascript
+const apiKey = "lba_ak_your_api_key_here";
+
+const response = await fetch(
+  "https://app.mindos.com/gate/lab/api/secondme/user/info",
+  {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  }
+);
+
+const data = await response.json();
+console.log(data);
+```
+
+## 权限管理
+
+创建 API Key 时需要指定权限。只有授权的权限才能访问对应的 API 功能。
+
+### 权限列表
+
+| 权限 | 说明 | 可访问的接口 |
+|------|------|-------------|
+| `user.info.name` | 用户姓名 | GET /api/secondme/user/info |
+| `user.info.email` | 用户邮箱 | GET /api/secondme/user/info |
+| `user.info.phone` | 用户电话 | GET /api/secondme/user/info |
+| `user.info.avatar` | 用户头像 | GET /api/secondme/user/info |
+| `user.info.bio` | 用户简介 | GET /api/secondme/user/info |
+| `user.info.selfIntroduction` | 自我介绍 | GET /api/secondme/user/info |
+| `user.info.softmemory` | 软记忆 | GET /api/secondme/user/softmemory |
+| `chat` | 聊天功能 | POST /api/secondme/chat/stream, GET /api/secondme/chat/session/* |
+| `*` | 全部权限 | 所有接口 |
+
+### 权限检查规则
+
+- 访问 `/api/secondme/user/info` 需要至少一个 `user.info.*` 权限
+- 访问 `/api/secondme/user/softmemory` 需要 `user.info.softmemory` 权限
+- 访问聊天相关接口需要 `chat` 权限
+- 通配符 `*` 表示拥有所有权限
+
+## 安全最佳实践
+
+### 1. 不要在客户端暴露 API Key
+
+API Key 应该只在服务端使用，不要在前端代码、移动应用或任何可被用户查看的地方暴露 API Key。
+
+```javascript
+// 错误示例：在前端代码中使用 API Key
+const apiKey = "lba_ak_xxx"; // 不要这样做！
+
+// 正确做法：通过后端代理请求
+fetch("/api/proxy/user-info"); // 后端服务持有 API Key
+```
+
+### 2. 使用环境变量存储 API Key
+
+```bash
+# .env 文件
+MINDVERSE_API_KEY=lba_ak_your_api_key_here
+```
+
+```python
+import os
+api_key = os.environ.get("MINDVERSE_API_KEY")
+```
+
+### 3. 限制 API Key 权限
+
+只申请必要的权限，遵循最小权限原则。
+
+### 4. 定期轮换 API Key
+
+建议定期更换 API Key，特别是在以下情况：
+- 团队成员离职
+- 怀疑 API Key 泄露
+- 定期安全审计
+
+### 5. 监控 API Key 使用情况
+
+定期检查 API Key 的使用记录，发现异常及时处理。
+
+## 错误处理
+
+### 认证失败
+
+```json
+{
+  "code": 401,
+  "message": "API Key 无效或已过期",
+  "error_code": "apikey.auth.invalid"
+}
+```
+
+### 权限不足
+
+```json
+{
+  "code": 403,
+  "message": "缺少必需的权限: chat",
+  "error_code": "apikey.permission.denied"
+}
+```
+
+## 下一步
+
+- [SecondMe API 参考](/zh/docs/api-reference/secondme) - 查看可用的 API 接口
+- [错误码参考](/zh/docs/errors) - 了解所有错误码

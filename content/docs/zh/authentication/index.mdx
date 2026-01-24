@@ -1,0 +1,70 @@
+---
+title: 认证概述
+description: 了解 SecondMe API 支持的两种认证方式：API Key 和 OAuth2
+---
+
+SecondMe API 支持两种认证方式：**API Key** 和 **OAuth2**。选择合适的认证方式取决于你的使用场景。
+
+## 认证方式对比
+
+| 特性 | API Key | OAuth2 |
+|------|---------|--------|
+| **适用场景** | 服务端调用、后台服务、自动化脚本 | 第三方应用接入、需要用户授权 |
+| **用户交互** | 无需用户参与 | 需要用户授权 |
+| **权限范围** | 创建时指定，不可动态调整 | 授权时由用户确认 |
+| **有效期** | 长期有效（可设置过期时间） | Access Token 2 小时，Refresh Token 30 天 |
+| **令牌前缀** | `lba_ak_` | `lba_at_`（Access Token） |
+| **撤销方式** | 删除 API Key | 用户撤销授权 |
+
+## 如何选择？
+
+### 使用 API Key 当：
+
+- 你在开发自己的后台服务
+- 不需要代表其他用户进行操作
+- 需要长期稳定的访问凭证
+- 在自动化脚本或定时任务中使用
+
+### 使用 OAuth2 当：
+
+- 你在开发面向用户的第三方应用
+- 需要访问其他用户的数据
+- 需要用户明确授权你的应用
+- 需要遵循标准的授权流程
+
+## 请求头格式
+
+无论使用哪种认证方式，都通过 `Authorization` 请求头传递凭证：
+
+```http
+Authorization: Bearer <token>
+```
+
+其中 `<token>` 可以是：
+- API Key：`lba_ak_xxxxx...`
+- OAuth2 Access Token：`lba_at_xxxxx...`
+
+## 权限 (Scopes)
+
+两种认证方式都使用相同的权限系统。创建 API Key 或请求 OAuth2 授权时，需要指定所需的权限：
+
+| 权限 | 说明 | 分组 |
+|------|------|------|
+| `user.info.name` | 访问用户姓名 | 用户基础信息 |
+| `user.info.email` | 访问用户邮箱 | 用户基础信息 |
+| `user.info.phone` | 访问用户电话 | 用户基础信息 |
+| `user.info.avatar` | 访问用户头像 | 用户基础信息 |
+| `user.info.bio` | 访问用户简介 | 用户扩展资料 |
+| `user.info.selfIntroduction` | 访问用户自我介绍 | 用户扩展资料 |
+| `user.info.voiceId` | 访问用户语音 ID | 用户扩展资料 |
+| `user.info.profileCompleteness` | 访问资料完整度 | 用户扩展资料 |
+| `user.info.shades` | 访问用户色调设置 | 用户扩展资料 |
+| `user.info.softmemory` | 访问用户软记忆 | 用户基础信息 |
+| `chat` | 访问聊天功能 | 聊天 |
+
+**注意**: API Key 还支持通配符 `*`，表示拥有所有权限。OAuth2 不支持通配符。
+
+## 下一步
+
+- [API Key 指南](/zh/docs/authentication/api-key) - 了解如何创建和使用 API Key
+- [OAuth2 指南](/zh/docs/authentication/oauth2) - 了解如何实现 OAuth2 授权流程

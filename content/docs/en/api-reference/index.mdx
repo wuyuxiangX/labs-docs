@@ -1,0 +1,76 @@
+---
+title: API Reference
+description: SecondMe API provides OAuth2 and SecondMe endpoint groups
+---
+
+SecondMe API provides the following endpoint groups:
+
+## OAuth2 Endpoints
+
+Standard OAuth2 authorization code flow endpoints.
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/oauth/authorize/external` | POST | User authorization, get authorization code |
+| `/api/oauth/token/code` | POST | Exchange code for token |
+| `/api/oauth/token/refresh` | POST | Refresh Access Token |
+
+[View OAuth2 API Details](/en/docs/api-reference/oauth)
+
+## SecondMe Endpoints
+
+User information access and AI chat functionality.
+
+| Endpoint | Method | Permission | Description |
+|----------|--------|------------|-------------|
+| `/api/secondme/user/info` | GET | user.info.* | Get user info |
+| `/api/secondme/user/softmemory` | GET | user.info.softmemory | Get user soft memories |
+| `/api/secondme/chat/stream` | POST | chat | Streaming chat (SSE) |
+| `/api/secondme/chat/session/list` | GET | chat | Get session list |
+| `/api/secondme/chat/session/messages` | GET | chat | Get session messages |
+
+[View SecondMe API Details](/en/docs/api-reference/secondme)
+
+## Base URL
+
+Base URL for all API requests:
+
+```
+https://app.mindos.com/gate/lab
+```
+
+## Authentication
+
+All SecondMe endpoints require authentication in the request header:
+
+```http
+Authorization: Bearer <token>
+```
+
+Where `<token>` can be:
+- API Key: `lba_ak_xxxxx...`
+- OAuth2 Access Token: `lba_at_xxxxx...`
+
+## Response Format
+
+### Success Response
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { ... }
+}
+```
+
+### Error Response
+
+```json
+{
+  "code": 400,
+  "message": "Error description",
+  "error_code": "module.resource.reason"
+}
+```
+
+See [Error Codes Reference](/en/docs/errors) for all error codes.

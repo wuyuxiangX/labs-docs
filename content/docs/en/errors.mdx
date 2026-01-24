@@ -1,0 +1,200 @@
+---
+title: Error Codes Reference
+description: All error codes that SecondMe API may return
+---
+
+This document lists all error codes that SecondMe API may return.
+
+## Error Response Format
+
+All API errors follow a unified response format:
+
+```json
+{
+  "code": 400,
+  "message": "Error description",
+  "error_code": "module.resource.reason"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| code | number | HTTP status code |
+| message | string | Human-readable error description |
+| error_code | string | Machine-readable error code |
+
+## Error Code Naming Convention
+
+Error codes follow the `{module}.{resource}.{reason}` format:
+
+- **module**: Module name (oauth2, apikey, secondme, etc.)
+- **resource**: Resource type (token, code, session, etc.)
+- **reason**: Error reason (invalid, expired, not_found, etc.)
+
+---
+
+## Common Error Codes
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| resource.fetch.not_found | 404 | Resource not found |
+| resource.auth.unauthorized | 401 | Unauthorized access |
+
+---
+
+## API Key Error Codes
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| apikey.fetch.not_found | 404 | API Key not found |
+| apikey.auth.missing | 401 | Missing Authorization header |
+| apikey.auth.invalid | 401 | API Key is invalid or expired |
+| apikey.permission.denied | 403 | Missing required permission |
+| apikey.scope.invalid | 400 | Invalid permission scope |
+
+---
+
+## OAuth2 Error Codes
+
+### Application Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.application.not_found | 404 | Application not found |
+| oauth2.application.unauthorized | 403 | Not authorized to access this application |
+| oauth2.application.invalid_type | 400 | Application type mismatch |
+| oauth2.application.invalid_status | 400 | Invalid application status |
+| oauth2.application.pending_review | 403 | Application pending review |
+| oauth2.application.rejected | 403 | Application has been rejected |
+| oauth2.application.suspended | 403 | Application has been suspended |
+
+### Authorization Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.authorization.not_found | 404 | Authorization record not found |
+| oauth2.authorization.revoked | 401 | Authorization has been revoked |
+
+### Token Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.token.invalid | 401 | Token is invalid |
+| oauth2.token.expired | 401 | Token has expired |
+| oauth2.token.revoked | 401 | Token has been revoked |
+| oauth2.token.not_found | 404 | Token not found |
+
+### Scope Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.scope.invalid | 400 | Invalid scope |
+| oauth2.scope.disallowed | 403 | Application is not allowed to request this scope |
+| oauth2.scope.insufficient | 403 | Insufficient scope |
+
+### Client Credentials Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.client.invalid | 400 | Invalid client |
+| oauth2.client.secret_mismatch | 401 | Client Secret does not match |
+
+### Authorization Code Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.code.invalid | 400 | Authorization code is invalid |
+| oauth2.code.expired | 400 | Authorization code has expired |
+| oauth2.code.used | 400 | Authorization code has already been used |
+| oauth2.code.revoked | 400 | Authorization code has been revoked |
+
+### Redirect URI Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.redirect_uri.invalid | 400 | Invalid Redirect URI |
+| oauth2.redirect_uri.mismatch | 400 | Redirect URI does not match |
+
+### Grant Type Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.grant_type.invalid | 400 | Invalid grant_type |
+| oauth2.grant_type.unsupported | 400 | Unsupported grant_type |
+
+### Refresh Token Related
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| oauth2.refresh_token.invalid | 400 | Refresh Token is invalid |
+| oauth2.refresh_token.expired | 401 | Refresh Token has expired |
+| oauth2.refresh_token.revoked | 401 | Refresh Token has been revoked |
+
+---
+
+## SecondMe Error Codes
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| secondme.user.invalid_id | 400 | Invalid user ID format |
+| secondme.session.not_found | 404 | Session not found |
+| secondme.session.unauthorized | 403 | Not authorized to access this session |
+| secondme.stream.error | 500 | Streaming response error |
+| secondme.context.build_failed | 500 | Context build failed |
+
+---
+
+## System Error Codes
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| internal.error | 500 | Internal server error |
+| connection.error | 503 | Service connection error |
+| invalid.param | 400 | Invalid request parameter |
+
+---
+
+## Error Handling Best Practices
+
+### 1. Check HTTP Status Code
+
+First check the HTTP status code to determine if the request was successful:
+
+- `2xx`: Request successful
+- `4xx`: Client error (parameter error, permission denied, etc.)
+- `5xx`: Server error
+
+### 2. Parse error_code
+
+Use `error_code` for programmatic error handling:
+
+```python
+response = api_call()
+
+if response.get("error_code") == "oauth2.token.expired":
+    # Refresh token
+    refresh_token()
+elif response.get("error_code") == "apikey.permission.denied":
+    # Show permission error to user
+    show_permission_error()
+```
+
+### 3. Display message to Users
+
+The `message` field contains human-readable error descriptions that can be displayed directly to users.
+
+### 4. Retry Strategy
+
+For `5xx` errors, implement exponential backoff retry:
+
+```python
+import time
+
+def api_call_with_retry(max_retries=3):
+    for attempt in range(max_retries):
+        response = api_call()
+        if response.status_code < 500:
+            return response
+        time.sleep(2 ** attempt)  # 1, 2, 4 seconds
+    raise Exception("Max retries exceeded")
+```

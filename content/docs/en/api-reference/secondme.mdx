@@ -1,0 +1,460 @@
+---
+title: SecondMe API Reference
+description: SecondMe API provides user information access and AI chat functionality
+---
+
+SecondMe API provides user information access and AI chat functionality.
+
+**Base URL**: `https://app.mindos.com/gate/lab`
+
+---
+
+## Get User Info
+
+Get authorized user's basic information. Returned fields depend on authorized permissions.
+
+```
+GET /api/secondme/user/info
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+At least one of the following:
+- `user.info.name`
+- `user.info.email`
+- `user.info.phone`
+- `user.info.avatar`
+- `user.info.bio`
+- `user.info.selfIntroduction`
+- `user.info.voiceId`
+- `user.info.profileCompleteness`
+- `user.info.shades`
+
+### Request Example
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### Response
+
+**Success (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "userId": 12345,
+    "name": "Username",
+    "email": "user@example.com",
+    "phone": "+8613800138000",
+    "avatar": "https://cdn.example.com/avatar.jpg",
+    "bio": "Personal bio",
+    "selfIntroduction": "Self introduction content",
+    "voiceId": "voice_001",
+    "profileCompleteness": 85.5
+  }
+}
+```
+
+| Field | Type | Required Permission | Description |
+|-------|------|---------------------|-------------|
+| userId | number | - | User ID (always returned) |
+| name | string | user.info.name | User's name |
+| email | string | user.info.email | User's email |
+| phone | string | user.info.phone | User's phone |
+| avatar | string | user.info.avatar | Avatar URL |
+| bio | string | user.info.bio | Personal bio |
+| selfIntroduction | string | user.info.selfIntroduction | Self introduction |
+| voiceId | string | user.info.voiceId | Voice ID |
+| profileCompleteness | number | user.info.profileCompleteness | Profile completeness (percentage) |
+
+> **Note**: Unauthorized fields will not appear in the response.
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| apikey.permission.denied | Missing required permission |
+
+---
+
+## Get User Soft Memories
+
+Get user's soft memory data (personal knowledge base).
+
+```
+GET /api/secondme/user/softmemory
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+`user.info.softmemory`
+
+### Request Example
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### Response
+
+**Success (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "softMemories": [
+      {
+        "id": 1,
+        "userId": 12345,
+        "factActor": "self",
+        "factContent": "Enjoys reading science fiction novels",
+        "createTime": "2024-01-15T10:30:00Z",
+        "updateTime": "2024-01-15T10:30:00Z"
+      },
+      {
+        "id": 2,
+        "userId": 12345,
+        "factActor": "self",
+        "factContent": "Wakes up at 7 AM every day",
+        "createTime": "2024-01-10T08:00:00Z",
+        "updateTime": "2024-01-10T08:00:00Z"
+      }
+    ],
+    "total": 2
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| softMemories | array | List of soft memories |
+| softMemories[].id | number | Soft memory ID |
+| softMemories[].userId | number | User ID |
+| softMemories[].factActor | string | Fact subject, fixed as `self` |
+| softMemories[].factContent | string | Fact content |
+| softMemories[].createTime | string | Creation time (ISO 8601) |
+| softMemories[].updateTime | string | Update time (ISO 8601) |
+| total | number | Total count |
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| apikey.permission.denied | Missing user.info.softmemory permission |
+
+---
+
+## Streaming Chat
+
+Have streaming conversations as the user's AI avatar.
+
+```
+POST /api/secondme/chat/stream
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+`chat`
+
+### Request Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| Authorization | Yes | Bearer Token |
+| Content-Type | Yes | application/json |
+| X-App-Id | No | Application ID, defaults to `general` |
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| message | string | Yes | User message content |
+| sessionId | string | No | Session ID, auto-generated if not provided |
+| appId | string | No | Application ID, takes priority over Header |
+| systemPrompt | string | No | System prompt, only effective on first request of new session |
+| receiverUserId | number | No | Receiver user ID (reserved field) |
+
+### Request Example
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/chat/stream" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Hello, introduce yourself",
+    "systemPrompt": "Please reply in a friendly tone"
+  }'
+```
+
+### Response
+
+Response type is `text/event-stream` (Server-Sent Events).
+
+**First message for new session:**
+
+```
+event: session
+data: {"sessionId": "labs_sess_a1b2c3d4e5f6"}
+
+```
+
+**Chat content stream:**
+
+```
+data: {"choices": [{"delta": {"content": "Hello"}}]}
+
+data: {"choices": [{"delta": {"content": "! I am"}}]}
+
+data: {"choices": [{"delta": {"content": " your AI avatar"}}]}
+
+data: [DONE]
+```
+
+### Stream Data Format
+
+| Event Type | Description |
+|------------|-------------|
+| session | Returns session ID when new session is created |
+| data | Incremental chat content |
+| [DONE] | End of stream marker |
+
+### Handling Streaming Response Example (Python)
+
+```python
+import requests
+
+response = requests.post(
+    "https://app.mindos.com/gate/lab/api/secondme/chat/stream",
+    headers={
+        "Authorization": "Bearer lba_ak_xxx",
+        "Content-Type": "application/json"
+    },
+    json={"message": "Hello"},
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode('utf-8')
+        if line.startswith('data: '):
+            data = line[6:]
+            if data == '[DONE]':
+                break
+            print(data)
+```
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| apikey.permission.denied | Missing chat permission |
+| secondme.user.invalid_id | Invalid user ID |
+| secondme.stream.error | Streaming response error |
+
+---
+
+## Get Session List
+
+Get user's chat session list.
+
+```
+GET /api/secondme/chat/session/list
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+`chat`
+
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| appId | string | No | Filter by application ID |
+
+### Request Example
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/list?appId=general" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### Response
+
+**Success (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "sessions": [
+      {
+        "sessionId": "labs_sess_a1b2c3d4",
+        "appId": "general",
+        "lastMessage": "Hello, introduce yourself...",
+        "lastUpdateTime": "2024-01-20T15:30:00Z",
+        "messageCount": 10
+      },
+      {
+        "sessionId": "labs_sess_e5f6g7h8",
+        "appId": "general",
+        "lastMessage": "What's the weather today?",
+        "lastUpdateTime": "2024-01-19T10:00:00Z",
+        "messageCount": 5
+      }
+    ]
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| sessions | array | Session list, sorted by last update time (descending) |
+| sessions[].sessionId | string | Session ID |
+| sessions[].appId | string | Application ID |
+| sessions[].lastMessage | string | Last message preview (truncated to 50 chars) |
+| sessions[].lastUpdateTime | string | Last update time (ISO 8601) |
+| sessions[].messageCount | number | Message count |
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| apikey.permission.denied | Missing chat permission |
+
+---
+
+## Get Session Messages
+
+Get message history for a specific session.
+
+```
+GET /api/secondme/chat/session/messages
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+`chat`
+
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| sessionId | string | Yes | Session ID |
+
+### Request Example
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/messages?sessionId=labs_sess_a1b2c3d4" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### Response
+
+**Success (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "sessionId": "labs_sess_a1b2c3d4",
+    "messages": [
+      {
+        "messageId": "msg_001",
+        "role": "system",
+        "content": "Please reply in a friendly tone",
+        "senderUserId": 12345,
+        "receiverUserId": null,
+        "createTime": "2024-01-20T15:00:00Z"
+      },
+      {
+        "messageId": "msg_002",
+        "role": "user",
+        "content": "Hello, introduce yourself",
+        "senderUserId": 12345,
+        "receiverUserId": null,
+        "createTime": "2024-01-20T15:00:05Z"
+      },
+      {
+        "messageId": "msg_003",
+        "role": "assistant",
+        "content": "Hello! I am your AI avatar...",
+        "senderUserId": 12345,
+        "receiverUserId": null,
+        "createTime": "2024-01-20T15:00:10Z"
+      }
+    ]
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| sessionId | string | Session ID |
+| messages | array | Message list, sorted by creation time (ascending) |
+| messages[].messageId | string | Message ID |
+| messages[].role | string | Role: `system`/`user`/`assistant` |
+| messages[].content | string | Message content |
+| messages[].senderUserId | number | Sender user ID |
+| messages[].receiverUserId | number | Receiver user ID (reserved) |
+| messages[].createTime | string | Creation time (ISO 8601) |
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| apikey.permission.denied | Missing chat permission |
+| secondme.session.not_found | Session not found |
+| secondme.session.unauthorized | Not authorized to access this session |
+
+---
+
+## Common Response Format
+
+### Success Response
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { ... }
+}
+```
+
+### Error Response
+
+```json
+{
+  "code": 403,
+  "message": "Missing required permission",
+  "error_code": "apikey.permission.denied"
+}
+```

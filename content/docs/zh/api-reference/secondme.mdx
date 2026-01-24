@@ -1,0 +1,460 @@
+---
+title: SecondMe API 参考
+description: SecondMe API 提供用户信息访问和 AI 聊天功能
+---
+
+SecondMe API 提供用户信息访问和 AI 聊天功能。
+
+**Base URL**: `https://app.mindos.com/gate/lab`
+
+---
+
+## 获取用户信息
+
+获取授权用户的基本信息，返回的字段取决于授权的权限。
+
+```
+GET /api/secondme/user/info
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+至少需要以下权限之一：
+- `user.info.name`
+- `user.info.email`
+- `user.info.phone`
+- `user.info.avatar`
+- `user.info.bio`
+- `user.info.selfIntroduction`
+- `user.info.voiceId`
+- `user.info.profileCompleteness`
+- `user.info.shades`
+
+### 请求示例
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### 响应
+
+**成功 (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "userId": 12345,
+    "name": "用户名",
+    "email": "user@example.com",
+    "phone": "+8613800138000",
+    "avatar": "https://cdn.example.com/avatar.jpg",
+    "bio": "个人简介",
+    "selfIntroduction": "自我介绍内容",
+    "voiceId": "voice_001",
+    "profileCompleteness": 85.5
+  }
+}
+```
+
+| 字段 | 类型 | 所需权限 | 说明 |
+|------|------|---------|------|
+| userId | number | - | 用户 ID（始终返回） |
+| name | string | user.info.name | 用户姓名 |
+| email | string | user.info.email | 用户邮箱 |
+| phone | string | user.info.phone | 用户电话 |
+| avatar | string | user.info.avatar | 头像 URL |
+| bio | string | user.info.bio | 个人简介 |
+| selfIntroduction | string | user.info.selfIntroduction | 自我介绍 |
+| voiceId | string | user.info.voiceId | 语音 ID |
+| profileCompleteness | number | user.info.profileCompleteness | 资料完整度（百分比） |
+
+> **注意**: 未授权的字段不会出现在响应中。
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| apikey.permission.denied | 缺少必需的权限 |
+
+---
+
+## 获取用户软记忆
+
+获取用户的软记忆数据（个人知识库）。
+
+```
+GET /api/secondme/user/softmemory
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+`user.info.softmemory`
+
+### 请求示例
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### 响应
+
+**成功 (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "softMemories": [
+      {
+        "id": 1,
+        "userId": 12345,
+        "factActor": "self",
+        "factContent": "喜欢阅读科幻小说",
+        "createTime": "2024-01-15T10:30:00Z",
+        "updateTime": "2024-01-15T10:30:00Z"
+      },
+      {
+        "id": 2,
+        "userId": 12345,
+        "factActor": "self",
+        "factContent": "每天早上 7 点起床",
+        "createTime": "2024-01-10T08:00:00Z",
+        "updateTime": "2024-01-10T08:00:00Z"
+      }
+    ],
+    "total": 2
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| softMemories | array | 软记忆列表 |
+| softMemories[].id | number | 软记忆 ID |
+| softMemories[].userId | number | 用户 ID |
+| softMemories[].factActor | string | 事实主体，固定为 `self` |
+| softMemories[].factContent | string | 事实内容 |
+| softMemories[].createTime | string | 创建时间（ISO 8601） |
+| softMemories[].updateTime | string | 更新时间（ISO 8601） |
+| total | number | 总数 |
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| apikey.permission.denied | 缺少 user.info.softmemory 权限 |
+
+---
+
+## 流式聊天
+
+以用户的 AI 分身进行流式对话。
+
+```
+POST /api/secondme/chat/stream
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+`chat`
+
+### 请求头
+
+| 头 | 必需 | 说明 |
+|---|------|------|
+| Authorization | 是 | Bearer Token |
+| Content-Type | 是 | application/json |
+| X-App-Id | 否 | 应用 ID，默认 `general` |
+
+### 请求参数
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| message | string | 是 | 用户消息内容 |
+| sessionId | string | 否 | 会话 ID，不提供则自动生成新会话 |
+| appId | string | 否 | 应用 ID，优先级高于 Header |
+| systemPrompt | string | 否 | 系统提示词，仅在新会话首次有效 |
+| receiverUserId | number | 否 | 接收方用户 ID（预留字段） |
+
+### 请求示例
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/chat/stream" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "你好，介绍一下自己",
+    "systemPrompt": "请用友好的语气回复"
+  }'
+```
+
+### 响应
+
+响应类型为 `text/event-stream` (Server-Sent Events)。
+
+**新会话首条消息:**
+
+```
+event: session
+data: {"sessionId": "labs_sess_a1b2c3d4e5f6"}
+
+```
+
+**聊天内容流:**
+
+```
+data: {"choices": [{"delta": {"content": "你好"}}]}
+
+data: {"choices": [{"delta": {"content": "！我是"}}]}
+
+data: {"choices": [{"delta": {"content": "你的 AI 分身"}}]}
+
+data: [DONE]
+```
+
+### 流数据格式
+
+| 事件类型 | 说明 |
+|---------|------|
+| session | 新会话创建时返回会话 ID |
+| data | 聊天内容增量 |
+| [DONE] | 流结束标志 |
+
+### 处理流式响应示例 (Python)
+
+```python
+import requests
+
+response = requests.post(
+    "https://app.mindos.com/gate/lab/api/secondme/chat/stream",
+    headers={
+        "Authorization": "Bearer lba_ak_xxx",
+        "Content-Type": "application/json"
+    },
+    json={"message": "你好"},
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        line = line.decode('utf-8')
+        if line.startswith('data: '):
+            data = line[6:]
+            if data == '[DONE]':
+                break
+            print(data)
+```
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| apikey.permission.denied | 缺少 chat 权限 |
+| secondme.user.invalid_id | 无效的用户 ID |
+| secondme.stream.error | 流式响应错误 |
+
+---
+
+## 获取会话列表
+
+获取用户的聊天会话列表。
+
+```
+GET /api/secondme/chat/session/list
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+`chat`
+
+### 查询参数
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| appId | string | 否 | 按应用 ID 筛选 |
+
+### 请求示例
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/list?appId=general" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### 响应
+
+**成功 (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "sessions": [
+      {
+        "sessionId": "labs_sess_a1b2c3d4",
+        "appId": "general",
+        "lastMessage": "你好，介绍一下自己...",
+        "lastUpdateTime": "2024-01-20T15:30:00Z",
+        "messageCount": 10
+      },
+      {
+        "sessionId": "labs_sess_e5f6g7h8",
+        "appId": "general",
+        "lastMessage": "今天天气怎么样？",
+        "lastUpdateTime": "2024-01-19T10:00:00Z",
+        "messageCount": 5
+      }
+    ]
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| sessions | array | 会话列表，按最后更新时间倒序 |
+| sessions[].sessionId | string | 会话 ID |
+| sessions[].appId | string | 应用 ID |
+| sessions[].lastMessage | string | 最后一条消息预览（截断至 50 字） |
+| sessions[].lastUpdateTime | string | 最后更新时间（ISO 8601） |
+| sessions[].messageCount | number | 消息数量 |
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| apikey.permission.denied | 缺少 chat 权限 |
+
+---
+
+## 获取会话消息历史
+
+获取指定会话的消息历史。
+
+```
+GET /api/secondme/chat/session/messages
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+`chat`
+
+### 查询参数
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| sessionId | string | 是 | 会话 ID |
+
+### 请求示例
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/messages?sessionId=labs_sess_a1b2c3d4" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### 响应
+
+**成功 (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "sessionId": "labs_sess_a1b2c3d4",
+    "messages": [
+      {
+        "messageId": "msg_001",
+        "role": "system",
+        "content": "请用友好的语气回复",
+        "senderUserId": 12345,
+        "receiverUserId": null,
+        "createTime": "2024-01-20T15:00:00Z"
+      },
+      {
+        "messageId": "msg_002",
+        "role": "user",
+        "content": "你好，介绍一下自己",
+        "senderUserId": 12345,
+        "receiverUserId": null,
+        "createTime": "2024-01-20T15:00:05Z"
+      },
+      {
+        "messageId": "msg_003",
+        "role": "assistant",
+        "content": "你好！我是你的 AI 分身...",
+        "senderUserId": 12345,
+        "receiverUserId": null,
+        "createTime": "2024-01-20T15:00:10Z"
+      }
+    ]
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| sessionId | string | 会话 ID |
+| messages | array | 消息列表，按创建时间升序 |
+| messages[].messageId | string | 消息 ID |
+| messages[].role | string | 角色：`system`/`user`/`assistant` |
+| messages[].content | string | 消息内容 |
+| messages[].senderUserId | number | 发送方用户 ID |
+| messages[].receiverUserId | number | 接收方用户 ID（预留） |
+| messages[].createTime | string | 创建时间（ISO 8601） |
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| apikey.permission.denied | 缺少 chat 权限 |
+| secondme.session.not_found | 会话不存在 |
+| secondme.session.unauthorized | 无权访问该会话 |
+
+---
+
+## 通用响应格式
+
+### 成功响应
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { ... }
+}
+```
+
+### 错误响应
+
+```json
+{
+  "code": 403,
+  "message": "缺少必需的权限",
+  "error_code": "apikey.permission.denied"
+}
+```
