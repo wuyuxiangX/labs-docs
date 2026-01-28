@@ -11,7 +11,7 @@ SecondMe API 提供用户信息访问和 AI 聊天功能。
 
 ## 获取用户信息
 
-获取授权用户的基本信息，返回的字段取决于授权的权限。
+获取授权用户的基本信息。
 
 ```
 GET /api/secondme/user/info
@@ -23,16 +23,7 @@ GET /api/secondme/user/info
 
 ### 所需权限
 
-至少需要以下权限之一：
-- `user.info.name`
-- `user.info.email`
-- `user.info.phone`
-- `user.info.avatar`
-- `user.info.bio`
-- `user.info.selfIntroduction`
-- `user.info.voiceId`
-- `user.info.profileCompleteness`
-- `user.info.shades`
+`user.info`
 
 ### 请求示例
 
@@ -50,44 +41,126 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
   "code": 0,
   "message": "success",
   "data": {
-    "userId": 12345,
     "name": "用户名",
     "email": "user@example.com",
-    "phone": "+8613800138000",
     "avatar": "https://cdn.example.com/avatar.jpg",
     "bio": "个人简介",
     "selfIntroduction": "自我介绍内容",
     "voiceId": "voice_001",
-    "profileCompleteness": 85.5
+    "profileCompleteness": 85
   }
 }
 ```
 
-| 字段 | 类型 | 所需权限 | 说明 |
-|------|------|---------|------|
-| userId | number | - | 用户 ID（始终返回） |
-| name | string | user.info.name | 用户姓名 |
-| email | string | user.info.email | 用户邮箱 |
-| phone | string | user.info.phone | 用户电话 |
-| avatar | string | user.info.avatar | 头像 URL |
-| bio | string | user.info.bio | 个人简介 |
-| selfIntroduction | string | user.info.selfIntroduction | 自我介绍 |
-| voiceId | string | user.info.voiceId | 语音 ID |
-| profileCompleteness | number | user.info.profileCompleteness | 资料完整度（百分比） |
-
-> **注意**: 未授权的字段不会出现在响应中。
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| name | string | 用户姓名 |
+| email | string | 用户邮箱 |
+| avatar | string | 头像 URL |
+| bio | string | 个人简介 |
+| selfIntroduction | string | 自我介绍 |
+| voiceId | string | 语音 ID |
+| profileCompleteness | number | 资料完整度（0-100） |
 
 ### 错误码
 
 | 错误码 | 说明 |
 |-------|------|
-| apikey.permission.denied | 缺少必需的权限 |
+| apikey.permission.denied | 缺少 user.info 权限 |
+
+---
+
+## 获取用户兴趣标签
+
+获取用户的兴趣标签（仅返回有公开内容的标签）。
+
+```
+GET /api/secondme/user/shades
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+`user.info.shades`
+
+### 请求示例
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/shades" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### 响应
+
+**成功 (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "shades": [
+      {
+        "id": 123,
+        "shadeName": "科技爱好者",
+        "shadeIcon": "https://cdn.example.com/icon.png",
+        "confidenceLevel": "HIGH",
+        "shadeDescription": "热爱科技",
+        "shadeDescriptionThirdView": "他/她热爱科技",
+        "shadeContent": "喜欢编程和数码产品",
+        "shadeContentThirdView": "他/她喜欢编程和数码产品",
+        "sourceTopics": ["编程", "AI"],
+        "shadeNamePublic": "科技达人",
+        "shadeIconPublic": "https://cdn.example.com/public-icon.png",
+        "confidenceLevelPublic": "HIGH",
+        "shadeDescriptionPublic": "科技爱好者",
+        "shadeDescriptionThirdViewPublic": "一位科技爱好者",
+        "shadeContentPublic": "热爱科技",
+        "shadeContentThirdViewPublic": "他/她热爱科技",
+        "sourceTopicsPublic": ["科技"],
+        "hasPublicContent": true
+      }
+    ]
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| shades | array | 兴趣标签列表 |
+| shades[].id | number | 标签 ID |
+| shades[].shadeName | string | 标签名称 |
+| shades[].shadeIcon | string | 标签图标 URL |
+| shades[].confidenceLevel | string | 置信度：`VERY_HIGH`、`HIGH`、`MEDIUM`、`LOW`、`VERY_LOW` |
+| shades[].shadeDescription | string | 标签描述 |
+| shades[].shadeDescriptionThirdView | string | 第三人称描述 |
+| shades[].shadeContent | string | 标签内容 |
+| shades[].shadeContentThirdView | string | 第三人称内容 |
+| shades[].sourceTopics | array | 来源主题 |
+| shades[].shadeNamePublic | string | 公开标签名称 |
+| shades[].shadeIconPublic | string | 公开图标 URL |
+| shades[].confidenceLevelPublic | string | 公开置信度 |
+| shades[].shadeDescriptionPublic | string | 公开描述 |
+| shades[].shadeDescriptionThirdViewPublic | string | 公开第三人称描述 |
+| shades[].shadeContentPublic | string | 公开内容 |
+| shades[].shadeContentThirdViewPublic | string | 公开第三人称内容 |
+| shades[].sourceTopicsPublic | array | 公开来源主题 |
+| shades[].hasPublicContent | boolean | 是否有公开内容 |
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| apikey.permission.denied | 缺少 user.info.shades 权限 |
 
 ---
 
 ## 获取用户软记忆
 
-获取用户的软记忆数据（个人知识库）。
+获取用户的软记忆数据（个人知识库），支持分页和搜索。
 
 ```
 GET /api/secondme/user/softmemory
@@ -101,10 +174,18 @@ GET /api/secondme/user/softmemory
 
 `user.info.softmemory`
 
+### 查询参数
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| keyword | string | 否 | 搜索关键词 |
+| pageNo | integer | 否 | 页码（默认: 1，最小: 1） |
+| pageSize | integer | 否 | 每页大小（默认: 20，最大: 100） |
+
 ### 请求示例
 
 ```bash
-curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory" \
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory?keyword=爱好&pageNo=1&pageSize=20" \
   -H "Authorization: Bearer lba_ak_your_api_key"
 ```
 
@@ -117,38 +198,50 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory" \
   "code": 0,
   "message": "success",
   "data": {
-    "softMemories": [
+    "list": [
       {
-        "id": 1,
+        "id": 456,
         "userId": 12345,
         "factActor": "self",
+        "factObject": "兴趣爱好",
         "factContent": "喜欢阅读科幻小说",
-        "createTime": "2024-01-15T10:30:00Z",
-        "updateTime": "2024-01-15T10:30:00Z"
+        "createTime": 1705315800000,
+        "updateTime": 1705315800000,
+        "dataType": "string",
+        "dataId": 789,
+        "readStatus": 1
       },
       {
-        "id": 2,
+        "id": 457,
         "userId": 12345,
         "factActor": "self",
+        "factObject": "日常作息",
         "factContent": "每天早上 7 点起床",
-        "createTime": "2024-01-10T08:00:00Z",
-        "updateTime": "2024-01-10T08:00:00Z"
+        "createTime": 1704873600000,
+        "updateTime": 1704873600000,
+        "dataType": "string",
+        "dataId": 790,
+        "readStatus": 0
       }
     ],
-    "total": 2
+    "total": 100
   }
 }
 ```
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| softMemories | array | 软记忆列表 |
-| softMemories[].id | number | 软记忆 ID |
-| softMemories[].userId | number | 用户 ID |
-| softMemories[].factActor | string | 事实主体，固定为 `self` |
-| softMemories[].factContent | string | 事实内容 |
-| softMemories[].createTime | string | 创建时间（ISO 8601） |
-| softMemories[].updateTime | string | 更新时间（ISO 8601） |
+| list | array | 软记忆列表 |
+| list[].id | number | 软记忆 ID |
+| list[].userId | number | 用户 ID |
+| list[].factActor | string | 事实主体：`self` 或 `other` |
+| list[].factObject | string | 事实对象/分类 |
+| list[].factContent | string | 事实内容 |
+| list[].createTime | number | 创建时间（毫秒时间戳） |
+| list[].updateTime | number | 更新时间（毫秒时间戳） |
+| list[].dataType | string | 数据类型 |
+| list[].dataId | number | 关联数据 ID |
+| list[].readStatus | number | 读取状态：`0` = 未读，`1` = 已读 |
 | total | number | 总数 |
 
 ### 错误码

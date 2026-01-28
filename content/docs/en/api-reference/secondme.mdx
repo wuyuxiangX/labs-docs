@@ -11,7 +11,7 @@ SecondMe API provides user information access and AI chat functionality.
 
 ## Get User Info
 
-Get authorized user's basic information. Returned fields depend on authorized permissions.
+Get authorized user's basic information.
 
 ```
 GET /api/secondme/user/info
@@ -23,16 +23,7 @@ Requires OAuth2 Token or API Key.
 
 ### Required Permissions
 
-At least one of the following:
-- `user.info.name`
-- `user.info.email`
-- `user.info.phone`
-- `user.info.avatar`
-- `user.info.bio`
-- `user.info.selfIntroduction`
-- `user.info.voiceId`
-- `user.info.profileCompleteness`
-- `user.info.shades`
+`user.info`
 
 ### Request Example
 
@@ -50,44 +41,126 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
   "code": 0,
   "message": "success",
   "data": {
-    "userId": 12345,
     "name": "Username",
     "email": "user@example.com",
-    "phone": "+8613800138000",
     "avatar": "https://cdn.example.com/avatar.jpg",
     "bio": "Personal bio",
     "selfIntroduction": "Self introduction content",
     "voiceId": "voice_001",
-    "profileCompleteness": 85.5
+    "profileCompleteness": 85
   }
 }
 ```
 
-| Field | Type | Required Permission | Description |
-|-------|------|---------------------|-------------|
-| userId | number | - | User ID (always returned) |
-| name | string | user.info.name | User's name |
-| email | string | user.info.email | User's email |
-| phone | string | user.info.phone | User's phone |
-| avatar | string | user.info.avatar | Avatar URL |
-| bio | string | user.info.bio | Personal bio |
-| selfIntroduction | string | user.info.selfIntroduction | Self introduction |
-| voiceId | string | user.info.voiceId | Voice ID |
-| profileCompleteness | number | user.info.profileCompleteness | Profile completeness (percentage) |
-
-> **Note**: Unauthorized fields will not appear in the response.
+| Field | Type | Description |
+|-------|------|-------------|
+| name | string | User's name |
+| email | string | User's email |
+| avatar | string | Avatar URL |
+| bio | string | Personal bio |
+| selfIntroduction | string | Self introduction |
+| voiceId | string | Voice ID |
+| profileCompleteness | number | Profile completeness (0-100) |
 
 ### Error Codes
 
 | Error Code | Description |
 |------------|-------------|
-| apikey.permission.denied | Missing required permission |
+| apikey.permission.denied | Missing user.info permission |
+
+---
+
+## Get User Shades
+
+Get user's interest tags (only returns tags with public content).
+
+```
+GET /api/secondme/user/shades
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+`user.info.shades`
+
+### Request Example
+
+```bash
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/shades" \
+  -H "Authorization: Bearer lba_ak_your_api_key"
+```
+
+### Response
+
+**Success (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "shades": [
+      {
+        "id": 123,
+        "shadeName": "Tech Enthusiast",
+        "shadeIcon": "https://cdn.example.com/icon.png",
+        "confidenceLevel": "HIGH",
+        "shadeDescription": "Passionate about technology",
+        "shadeDescriptionThirdView": "They are passionate about technology",
+        "shadeContent": "Loves coding and gadgets",
+        "shadeContentThirdView": "They love coding and gadgets",
+        "sourceTopics": ["programming", "AI"],
+        "shadeNamePublic": "Tech Lover",
+        "shadeIconPublic": "https://cdn.example.com/public-icon.png",
+        "confidenceLevelPublic": "HIGH",
+        "shadeDescriptionPublic": "Tech enthusiast",
+        "shadeDescriptionThirdViewPublic": "A tech enthusiast",
+        "shadeContentPublic": "Enjoys technology",
+        "shadeContentThirdViewPublic": "They enjoy technology",
+        "sourceTopicsPublic": ["tech"],
+        "hasPublicContent": true
+      }
+    ]
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| shades | array | List of interest tags |
+| shades[].id | number | Tag ID |
+| shades[].shadeName | string | Tag name |
+| shades[].shadeIcon | string | Tag icon URL |
+| shades[].confidenceLevel | string | Confidence level: `VERY_HIGH`, `HIGH`, `MEDIUM`, `LOW`, `VERY_LOW` |
+| shades[].shadeDescription | string | Tag description |
+| shades[].shadeDescriptionThirdView | string | Third-person description |
+| shades[].shadeContent | string | Tag content |
+| shades[].shadeContentThirdView | string | Third-person content |
+| shades[].sourceTopics | array | Source topics |
+| shades[].shadeNamePublic | string | Public tag name |
+| shades[].shadeIconPublic | string | Public icon URL |
+| shades[].confidenceLevelPublic | string | Public confidence level |
+| shades[].shadeDescriptionPublic | string | Public description |
+| shades[].shadeDescriptionThirdViewPublic | string | Public third-person description |
+| shades[].shadeContentPublic | string | Public content |
+| shades[].shadeContentThirdViewPublic | string | Public third-person content |
+| shades[].sourceTopicsPublic | array | Public source topics |
+| shades[].hasPublicContent | boolean | Whether has public content |
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| apikey.permission.denied | Missing user.info.shades permission |
 
 ---
 
 ## Get User Soft Memories
 
-Get user's soft memory data (personal knowledge base).
+Get user's soft memory data (personal knowledge base) with pagination and search support.
 
 ```
 GET /api/secondme/user/softmemory
@@ -101,10 +174,18 @@ Requires OAuth2 Token or API Key.
 
 `user.info.softmemory`
 
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| keyword | string | No | Search keyword to filter memories |
+| pageNo | integer | No | Page number (default: 1, min: 1) |
+| pageSize | integer | No | Page size (default: 20, max: 100) |
+
 ### Request Example
 
 ```bash
-curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory" \
+curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory?keyword=hobby&pageNo=1&pageSize=20" \
   -H "Authorization: Bearer lba_ak_your_api_key"
 ```
 
@@ -117,38 +198,50 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory" \
   "code": 0,
   "message": "success",
   "data": {
-    "softMemories": [
+    "list": [
       {
-        "id": 1,
+        "id": 456,
         "userId": 12345,
         "factActor": "self",
+        "factObject": "Hobbies",
         "factContent": "Enjoys reading science fiction novels",
-        "createTime": "2024-01-15T10:30:00Z",
-        "updateTime": "2024-01-15T10:30:00Z"
+        "createTime": 1705315800000,
+        "updateTime": 1705315800000,
+        "dataType": "string",
+        "dataId": 789,
+        "readStatus": 1
       },
       {
-        "id": 2,
+        "id": 457,
         "userId": 12345,
         "factActor": "self",
+        "factObject": "Daily Routine",
         "factContent": "Wakes up at 7 AM every day",
-        "createTime": "2024-01-10T08:00:00Z",
-        "updateTime": "2024-01-10T08:00:00Z"
+        "createTime": 1704873600000,
+        "updateTime": 1704873600000,
+        "dataType": "string",
+        "dataId": 790,
+        "readStatus": 0
       }
     ],
-    "total": 2
+    "total": 100
   }
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| softMemories | array | List of soft memories |
-| softMemories[].id | number | Soft memory ID |
-| softMemories[].userId | number | User ID |
-| softMemories[].factActor | string | Fact subject, fixed as `self` |
-| softMemories[].factContent | string | Fact content |
-| softMemories[].createTime | string | Creation time (ISO 8601) |
-| softMemories[].updateTime | string | Update time (ISO 8601) |
+| list | array | List of soft memories |
+| list[].id | number | Soft memory ID |
+| list[].userId | number | User ID |
+| list[].factActor | string | Fact subject: `self` or `other` |
+| list[].factObject | string | Fact object/category |
+| list[].factContent | string | Fact content |
+| list[].createTime | number | Creation time (milliseconds timestamp) |
+| list[].updateTime | number | Update time (milliseconds timestamp) |
+| list[].dataType | string | Data type |
+| list[].dataId | number | Related data ID |
+| list[].readStatus | number | Read status: `0` = unread, `1` = read |
 | total | number | Total count |
 
 ### Error Codes

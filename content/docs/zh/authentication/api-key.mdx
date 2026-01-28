@@ -78,19 +78,16 @@ console.log(data);
 
 | 权限 | 说明 | 可访问的接口 |
 |------|------|-------------|
-| `user.info.name` | 用户姓名 | GET /api/secondme/user/info |
-| `user.info.email` | 用户邮箱 | GET /api/secondme/user/info |
-| `user.info.phone` | 用户电话 | GET /api/secondme/user/info |
-| `user.info.avatar` | 用户头像 | GET /api/secondme/user/info |
-| `user.info.bio` | 用户简介 | GET /api/secondme/user/info |
-| `user.info.selfIntroduction` | 自我介绍 | GET /api/secondme/user/info |
+| `user.info` | 用户基础信息（name, email, avatar, bio, selfIntroduction, voiceId, profileCompleteness） | GET /api/secondme/user/info |
+| `user.info.shades` | 用户兴趣标签 | GET /api/secondme/user/shades |
 | `user.info.softmemory` | 软记忆 | GET /api/secondme/user/softmemory |
 | `chat` | 聊天功能 | POST /api/secondme/chat/stream, GET /api/secondme/chat/session/* |
 | `*` | 全部权限 | 所有接口 |
 
 ### 权限检查规则
 
-- 访问 `/api/secondme/user/info` 需要至少一个 `user.info.*` 权限
+- 访问 `/api/secondme/user/info` 需要 `user.info` 权限
+- 访问 `/api/secondme/user/shades` 需要 `user.info.shades` 权限
 - 访问 `/api/secondme/user/softmemory` 需要 `user.info.softmemory` 权限
 - 访问聊天相关接口需要 `chat` 权限
 - 通配符 `*` 表示拥有所有权限

@@ -244,9 +244,9 @@ paths:
         - SecondMe
       summary: Get User Info
       description: |
-        Get authorized user's basic information. Returned fields depend on authorized permissions.
+        Get authorized user's basic information.
 
-        **Required Permissions**: At least one of `user.info.*` permissions.
+        **Required Permission**: `user.info`
       operationId: getUserInfo
       security:
         - BearerAuth: []
@@ -275,7 +275,43 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 code: 403
-                message: "Missing required permission"
+                message: "Missing user.info permission"
+                error_code: "apikey.permission.denied"
+
+  /api/secondme/user/shades:
+    get:
+      tags:
+        - SecondMe
+      summary: Get User Shades
+      description: |
+        Get user's interest tags (only returns tags with public content).
+
+        **Required Permission**: `user.info.shades`
+      operationId: getUserShades
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShadesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 403
+                message: "Missing user.info.shades permission"
                 error_code: "apikey.permission.denied"
 
   /api/secondme/user/softmemory:
@@ -284,12 +320,35 @@ paths:
         - SecondMe
       summary: Get User Soft Memories
       description: |
-        Get user's soft memory data (personal knowledge base).
+        Get user's soft memory data (personal knowledge base) with pagination and search support.
 
         **Required Permission**: `user.info.softmemory`
       operationId: getUserSoftMemory
       security:
         - BearerAuth: []
+      parameters:
+        - name: keyword
+          in: query
+          description: Search keyword to filter memories
+          required: false
+          schema:
+            type: string
+        - name: pageNo
+          in: query
+          description: Page number (default 1, min 1)
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: pageSize
+          in: query
+          description: Page size (default 20, max 100)
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
       responses:
         '200':
           description: Success
@@ -633,45 +692,133 @@ components:
         data:
           type: object
           properties:
-            userId:
-              type: integer
-              description: User ID (always returned)
-              example: 12345
             name:
               type: string
-              description: User's name (requires user.info.name)
+              description: User's name
               example: "Username"
             email:
               type: string
               format: email
-              description: User's email (requires user.info.email)
+              description: User's email
               example: "user@example.com"
-            phone:
-              type: string
-              description: User's phone (requires user.info.phone)
-              example: "+8613800138000"
             avatar:
               type: string
               format: uri
-              description: Avatar URL (requires user.info.avatar)
+              description: Avatar URL
               example: "https://cdn.example.com/avatar.jpg"
             bio:
               type: string
-              description: Personal bio (requires user.info.bio)
+              description: Personal bio
               example: "Personal bio"
             selfIntroduction:
               type: string
-              description: Self introduction (requires user.info.selfIntroduction)
+              description: Self introduction
               example: "Self introduction content"
             voiceId:
               type: string
-              description: Voice ID (requires user.info.voiceId)
+              description: Voice ID
               example: "voice_001"
             profileCompleteness:
-              type: number
-              format: float
-              description: Profile completeness percentage (requires user.info.profileCompleteness)
-              example: 85.5
+              type: integer
+              description: Profile completeness (0-100)
+              example: 85
+
+    ShadesResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            shades:
+              type: array
+              items:
+                $ref: '#/components/schemas/Shade'
+
+    Shade:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Tag ID
+          example: 123
+        shadeName:
+          type: string
+          description: Tag name
+          example: "Tech Enthusiast"
+        shadeIcon:
+          type: string
+          description: Tag icon URL
+          example: "https://cdn.example.com/icon.png"
+        confidenceLevel:
+          type: string
+          description: "Confidence level: VERY_HIGH, HIGH, MEDIUM, LOW, VERY_LOW"
+          example: "HIGH"
+        shadeDescription:
+          type: string
+          description: Tag description
+          example: "Passionate about technology"
+        shadeDescriptionThirdView:
+          type: string
+          description: Third-person description
+          example: "They are passionate about technology"
+        shadeContent:
+          type: string
+          description: Tag content
+          example: "Loves coding and gadgets"
+        shadeContentThirdView:
+          type: string
+          description: Third-person content
+          example: "They love coding and gadgets"
+        sourceTopics:
+          type: array
+          items:
+            type: string
+          description: Source topics
+          example: ["programming", "AI"]
+        shadeNamePublic:
+          type: string
+          description: Public tag name
+          example: "Tech Lover"
+        shadeIconPublic:
+          type: string
+          description: Public icon URL
+          example: "https://cdn.example.com/public-icon.png"
+        confidenceLevelPublic:
+          type: string
+          description: Public confidence level
+          example: "HIGH"
+        shadeDescriptionPublic:
+          type: string
+          description: Public description
+          example: "Tech enthusiast"
+        shadeDescriptionThirdViewPublic:
+          type: string
+          description: Public third-person description
+          example: "A tech enthusiast"
+        shadeContentPublic:
+          type: string
+          description: Public content
+          example: "Enjoys technology"
+        shadeContentThirdViewPublic:
+          type: string
+          description: Public third-person content
+          example: "They enjoy technology"
+        sourceTopicsPublic:
+          type: array
+          items:
+            type: string
+          description: Public source topics
+          example: ["tech"]
+        hasPublicContent:
+          type: boolean
+          description: Whether has public content
+          example: true
 
     SoftMemoryResponse:
       type: object
@@ -685,14 +832,14 @@ components:
         data:
           type: object
           properties:
-            softMemories:
+            list:
               type: array
               items:
                 $ref: '#/components/schemas/SoftMemory'
             total:
               type: integer
               description: Total count
-              example: 2
+              example: 100
 
     SoftMemory:
       type: object
@@ -700,29 +847,45 @@ components:
         id:
           type: integer
           description: Soft memory ID
-          example: 1
+          example: 456
         userId:
           type: integer
           description: User ID
           example: 12345
         factActor:
           type: string
-          description: Fact subject, fixed as `self`
+          description: "Fact subject: self or other"
           example: "self"
+        factObject:
+          type: string
+          description: Fact object/category
+          example: "Hobbies"
         factContent:
           type: string
           description: Fact content
           example: "Enjoys reading science fiction novels"
         createTime:
-          type: string
-          format: date-time
-          description: Creation time (ISO 8601)
-          example: "2024-01-15T10:30:00Z"
+          type: integer
+          format: int64
+          description: Creation time (milliseconds timestamp)
+          example: 1705315800000
         updateTime:
+          type: integer
+          format: int64
+          description: Update time (milliseconds timestamp)
+          example: 1705315800000
+        dataType:
           type: string
-          format: date-time
-          description: Update time (ISO 8601)
-          example: "2024-01-15T10:30:00Z"
+          description: Data type
+          example: "string"
+        dataId:
+          type: integer
+          description: Related data ID
+          example: 789
+        readStatus:
+          type: integer
+          description: "Read status: 0 = unread, 1 = read"
+          example: 1
 
     ChatStreamRequest:
       type: object
