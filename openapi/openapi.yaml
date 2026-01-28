@@ -373,6 +373,83 @@ paths:
                 message: "Missing user.info.softmemory permission"
                 error_code: "apikey.permission.denied"
 
+  /api/secondme/note/add:
+    post:
+      tags:
+        - SecondMe
+      summary: Add Note
+      description: |
+        Create a note or memory. Supports two types:
+        - TEXT: Text note, requires content
+        - LINK: Link note, requires urls (backend will auto-extract content)
+
+        **Required Permission**: `note.add`
+      operationId: addNote
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddNoteRequest'
+            examples:
+              textNote:
+                summary: Text Note
+                value:
+                  content: "Learned about Python async programming today"
+                  title: "Study Notes"
+                  memoryType: "TEXT"
+              linkNote:
+                summary: Link Note
+                value:
+                  urls:
+                    - "https://example.com/article"
+                  title: "Interesting Article"
+                  memoryType: "LINK"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddNoteResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                contentRequired:
+                  summary: Content required for TEXT type
+                  value:
+                    code: 400
+                    message: "TEXT type notes must provide content"
+                    error_code: "note.content.required"
+                urlsRequired:
+                  summary: URLs required for LINK type
+                  value:
+                    code: 400
+                    message: "LINK type notes must provide urls"
+                    error_code: "note.urls.required"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 403
+                message: "Missing note.add permission"
+                error_code: "auth.scope.missing"
+
   /api/secondme/chat/stream:
     post:
       tags:
@@ -866,6 +943,54 @@ components:
           format: int64
           description: Update time (milliseconds timestamp)
           example: 1705315800000
+
+    AddNoteRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          maxLength: 50000
+          description: Note content (required for TEXT type)
+          example: "Learned about Python async programming today"
+        title:
+          type: string
+          maxLength: 200
+          description: Note title (optional)
+          example: "Study Notes"
+        urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          maxItems: 10
+          description: URL list (required for LINK type)
+          example:
+            - "https://example.com/article"
+        memoryType:
+          type: string
+          enum:
+            - TEXT
+            - LINK
+          default: TEXT
+          description: "Note type: TEXT (default) or LINK"
+          example: "TEXT"
+
+    AddNoteResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            noteId:
+              type: integer
+              description: Created note ID
+              example: 12345
 
     ChatStreamRequest:
       type: object

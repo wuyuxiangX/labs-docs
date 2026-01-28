@@ -81,6 +81,7 @@ console.log(data);
 | `user.info` | 用户基础信息（name, email, avatar, bio, selfIntroduction, voiceId, profileCompleteness） | GET /api/secondme/user/info |
 | `user.info.shades` | 用户兴趣标签 | GET /api/secondme/user/shades |
 | `user.info.softmemory` | 软记忆 | GET /api/secondme/user/softmemory |
+| `note.add` | 添加笔记和记忆 | POST /api/secondme/note/add |
 | `chat` | 聊天功能 | POST /api/secondme/chat/stream, GET /api/secondme/chat/session/* |
 | `*` | 全部权限 | 所有接口 |
 
@@ -89,6 +90,7 @@ console.log(data);
 - 访问 `/api/secondme/user/info` 需要 `user.info` 权限
 - 访问 `/api/secondme/user/shades` 需要 `user.info.shades` 权限
 - 访问 `/api/secondme/user/softmemory` 需要 `user.info.softmemory` 权限
+- 访问 `/api/secondme/note/add` 需要 `note.add` 权限
 - 访问聊天相关接口需要 `chat` 权限
 - 通配符 `*` 表示拥有所有权限
 

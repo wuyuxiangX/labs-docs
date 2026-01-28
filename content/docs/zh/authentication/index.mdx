@@ -50,16 +50,10 @@ Authorization: Bearer <token>
 
 | 权限 | 说明 | 分组 |
 |------|------|------|
-| `user.info.name` | 访问用户姓名 | 用户基础信息 |
-| `user.info.email` | 访问用户邮箱 | 用户基础信息 |
-| `user.info.phone` | 访问用户电话 | 用户基础信息 |
-| `user.info.avatar` | 访问用户头像 | 用户基础信息 |
-| `user.info.bio` | 访问用户简介 | 用户扩展资料 |
-| `user.info.selfIntroduction` | 访问用户自我介绍 | 用户扩展资料 |
-| `user.info.voiceId` | 访问用户语音 ID | 用户扩展资料 |
-| `user.info.profileCompleteness` | 访问资料完整度 | 用户扩展资料 |
-| `user.info.shades` | 访问用户色调设置 | 用户扩展资料 |
-| `user.info.softmemory` | 访问用户软记忆 | 用户基础信息 |
+| `user.info` | 访问用户基础信息（姓名、邮箱、头像等） | 用户信息 |
+| `user.info.shades` | 访问用户兴趣标签 | 用户信息 |
+| `user.info.softmemory` | 访问用户软记忆 | 用户信息 |
+| `note.add` | 添加笔记和记忆 | 笔记 |
 | `chat` | 访问聊天功能 | 聊天 |
 
 **注意**: API Key 还支持通配符 `*`，表示拥有所有权限。OAuth2 不支持通配符。

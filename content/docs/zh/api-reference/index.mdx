@@ -23,8 +23,10 @@ SecondMe API 提供以下接口分组：
 
 | 端点 | 方法 | 权限 | 说明 |
 |------|------|------|------|
-| `/api/secondme/user/info` | GET | user.info.* | 获取用户信息 |
+| `/api/secondme/user/info` | GET | user.info | 获取用户信息 |
+| `/api/secondme/user/shades` | GET | user.info.shades | 获取用户兴趣标签 |
 | `/api/secondme/user/softmemory` | GET | user.info.softmemory | 获取用户软记忆 |
+| `/api/secondme/note/add` | POST | note.add | 添加笔记 |
 | `/api/secondme/chat/stream` | POST | chat | 流式聊天 (SSE) |
 | `/api/secondme/chat/session/list` | GET | chat | 获取会话列表 |
 | `/api/secondme/chat/session/messages` | GET | chat | 获取会话消息 |

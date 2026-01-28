@@ -80,6 +80,7 @@ You need to specify permissions when creating an API Key. Only authorized permis
 | `user.info` | User's basic info (name, email, avatar, bio, selfIntroduction, voiceId, profileCompleteness) | GET /api/secondme/user/info |
 | `user.info.shades` | User's interest tags | GET /api/secondme/user/shades |
 | `user.info.softmemory` | Soft memories | GET /api/secondme/user/softmemory |
+| `note.add` | Add notes and memories | POST /api/secondme/note/add |
 | `chat` | Chat functionality | POST /api/secondme/chat/stream, GET /api/secondme/chat/session/* |
 | `*` | All permissions | All endpoints |
 
@@ -88,6 +89,7 @@ You need to specify permissions when creating an API Key. Only authorized permis
 - Accessing `/api/secondme/user/info` requires `user.info` permission
 - Accessing `/api/secondme/user/shades` requires `user.info.shades` permission
 - Accessing `/api/secondme/user/softmemory` requires `user.info.softmemory` permission
+- Accessing `/api/secondme/note/add` requires `note.add` permission
 - Accessing chat-related endpoints requires `chat` permission
 - Wildcard `*` grants all permissions
 

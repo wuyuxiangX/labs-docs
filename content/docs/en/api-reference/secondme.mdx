@@ -237,6 +237,87 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory?keywor
 
 ---
 
+## Add Note
+
+Create a note or memory. Supports two types: text notes and link notes.
+
+```
+POST /api/secondme/note/add
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+`note.add`
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| content | string | Yes for TEXT type | Note content (max 50000 characters) |
+| title | string | No | Note title (max 200 characters) |
+| urls | string[] | Yes for LINK type | URL list (max 10 URLs) |
+| memoryType | string | No | Note type: `TEXT` (default) or `LINK` |
+
+### Request Examples
+
+**Text Note:**
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Learned about Python async programming today",
+    "title": "Study Notes",
+    "memoryType": "TEXT"
+  }'
+```
+
+**Link Note:**
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": ["https://example.com/article"],
+    "title": "Interesting Article",
+    "memoryType": "LINK"
+  }'
+```
+
+### Response
+
+**Success (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "noteId": 12345
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| noteId | number | Created note ID |
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| auth.scope.missing | Missing note.add permission |
+| note.content.required | TEXT type notes must provide content |
+| note.urls.required | LINK type notes must provide urls |
+
+---
+
 ## Streaming Chat
 
 Have streaming conversations as the user's AI avatar.

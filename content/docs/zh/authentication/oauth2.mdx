@@ -163,13 +163,10 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 
 | 权限 | 说明 |
 |------|------|
-| `user.info.name` | 访问用户姓名 |
-| `user.info.email` | 访问用户邮箱 |
-| `user.info.phone` | 访问用户电话 |
-| `user.info.avatar` | 访问用户头像 |
-| `user.info.bio` | 访问用户简介 |
-| `user.info.selfIntroduction` | 访问用户自我介绍 |
+| `user.info` | 访问用户基础信息（姓名、邮箱、头像等） |
+| `user.info.shades` | 访问用户兴趣标签 |
 | `user.info.softmemory` | 访问用户软记忆 |
+| `note.add` | 添加笔记和记忆 |
 | `chat` | 访问聊天功能 |
 
 **最佳实践**: 只请求必要的权限，避免请求过多权限导致用户拒绝授权。

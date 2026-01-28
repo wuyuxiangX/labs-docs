@@ -237,6 +237,87 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory?keywor
 
 ---
 
+## 添加笔记
+
+创建一条笔记或记忆，支持文本笔记和链接笔记两种类型。
+
+```
+POST /api/secondme/note/add
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+`note.add`
+
+### 请求参数
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| content | string | TEXT 类型必填 | 笔记内容（最大 50000 字符） |
+| title | string | 否 | 笔记标题（最大 200 字符） |
+| urls | string[] | LINK 类型必填 | URL 列表（最多 10 个） |
+| memoryType | string | 否 | 笔记类型：`TEXT`（默认）或 `LINK` |
+
+### 请求示例
+
+**文本笔记：**
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "今天学习了 Python 的异步编程",
+    "title": "学习笔记",
+    "memoryType": "TEXT"
+  }'
+```
+
+**链接笔记：**
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": ["https://example.com/article"],
+    "title": "有趣的文章",
+    "memoryType": "LINK"
+  }'
+```
+
+### 响应
+
+**成功 (200)**
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "noteId": 12345
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| noteId | number | 创建的笔记 ID |
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| auth.scope.missing | 缺少 note.add 权限 |
+| note.content.required | TEXT 类型笔记必须提供 content |
+| note.urls.required | LINK 类型笔记必须提供 urls |
+
+---
+
 ## 流式聊天
 
 以用户的 AI 分身进行流式对话。

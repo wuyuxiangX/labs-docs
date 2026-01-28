@@ -163,13 +163,10 @@ You need to specify permission list when requesting authorization. Users can see
 
 | Scope | Description |
 |-------|-------------|
-| `user.info.name` | Access user's name |
-| `user.info.email` | Access user's email |
-| `user.info.phone` | Access user's phone |
-| `user.info.avatar` | Access user's avatar |
-| `user.info.bio` | Access user's bio |
-| `user.info.selfIntroduction` | Access user's self introduction |
+| `user.info` | Access user's basic info (name, email, avatar, etc.) |
+| `user.info.shades` | Access user's interest tags |
 | `user.info.softmemory` | Access user's soft memories |
+| `note.add` | Add notes and memories |
 | `chat` | Access chat functionality |
 
 **Best Practice**: Only request necessary permissions to avoid users rejecting authorization due to excessive permission requests.

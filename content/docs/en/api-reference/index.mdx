@@ -23,8 +23,10 @@ User information access and AI chat functionality.
 
 | Endpoint | Method | Permission | Description |
 |----------|--------|------------|-------------|
-| `/api/secondme/user/info` | GET | user.info.* | Get user info |
+| `/api/secondme/user/info` | GET | user.info | Get user info |
+| `/api/secondme/user/shades` | GET | user.info.shades | Get user interest tags |
 | `/api/secondme/user/softmemory` | GET | user.info.softmemory | Get user soft memories |
+| `/api/secondme/note/add` | POST | note.add | Add note |
 | `/api/secondme/chat/stream` | POST | chat | Streaming chat (SSE) |
 | `/api/secondme/chat/session/list` | GET | chat | Get session list |
 | `/api/secondme/chat/session/messages` | GET | chat | Get session messages |

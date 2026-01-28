@@ -86,16 +86,10 @@ Both authentication methods use the same permission system. When creating an API
 
 | Scope | Description | Category |
 |-------|-------------|----------|
-| `user.info.name` | Access user's name | Basic Info |
-| `user.info.email` | Access user's email | Basic Info |
-| `user.info.phone` | Access user's phone | Basic Info |
-| `user.info.avatar` | Access user's avatar | Basic Info |
-| `user.info.bio` | Access user's bio | Extended Profile |
-| `user.info.selfIntroduction` | Access user's self introduction | Extended Profile |
-| `user.info.voiceId` | Access user's voice ID | Extended Profile |
-| `user.info.profileCompleteness` | Access profile completeness | Extended Profile |
-| `user.info.shades` | Access user's shade settings | Extended Profile |
-| `user.info.softmemory` | Access user's soft memories | Basic Info |
+| `user.info` | Access user's basic info (name, email, avatar, etc.) | User Info |
+| `user.info.shades` | Access user's interest tags | User Info |
+| `user.info.softmemory` | Access user's soft memories | User Info |
+| `note.add` | Add notes and memories | Notes |
 | `chat` | Access chat functionality | Chat |
 
 **Note**: API Key also supports wildcard `*` for all permissions. OAuth2 does not support wildcards.
