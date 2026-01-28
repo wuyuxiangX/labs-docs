@@ -848,14 +848,6 @@ components:
           type: integer
           description: Soft memory ID
           example: 456
-        userId:
-          type: integer
-          description: User ID
-          example: 12345
-        factActor:
-          type: string
-          description: "Fact subject: self or other"
-          example: "self"
         factObject:
           type: string
           description: Fact object/category
@@ -874,18 +866,6 @@ components:
           format: int64
           description: Update time (milliseconds timestamp)
           example: 1705315800000
-        dataType:
-          type: string
-          description: Data type
-          example: "string"
-        dataId:
-          type: integer
-          description: Related data ID
-          example: 789
-        readStatus:
-          type: integer
-          description: "Read status: 0 = unread, 1 = read"
-          example: 1
 
     ChatStreamRequest:
       type: object

@@ -201,27 +201,17 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory?keywor
     "list": [
       {
         "id": 456,
-        "userId": 12345,
-        "factActor": "self",
         "factObject": "Hobbies",
         "factContent": "Enjoys reading science fiction novels",
         "createTime": 1705315800000,
-        "updateTime": 1705315800000,
-        "dataType": "string",
-        "dataId": 789,
-        "readStatus": 1
+        "updateTime": 1705315800000
       },
       {
         "id": 457,
-        "userId": 12345,
-        "factActor": "self",
         "factObject": "Daily Routine",
         "factContent": "Wakes up at 7 AM every day",
         "createTime": 1704873600000,
-        "updateTime": 1704873600000,
-        "dataType": "string",
-        "dataId": 790,
-        "readStatus": 0
+        "updateTime": 1704873600000
       }
     ],
     "total": 100
@@ -233,15 +223,10 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory?keywor
 |-------|------|-------------|
 | list | array | List of soft memories |
 | list[].id | number | Soft memory ID |
-| list[].userId | number | User ID |
-| list[].factActor | string | Fact subject: `self` or `other` |
 | list[].factObject | string | Fact object/category |
 | list[].factContent | string | Fact content |
 | list[].createTime | number | Creation time (milliseconds timestamp) |
 | list[].updateTime | number | Update time (milliseconds timestamp) |
-| list[].dataType | string | Data type |
-| list[].dataId | number | Related data ID |
-| list[].readStatus | number | Read status: `0` = unread, `1` = read |
 | total | number | Total count |
 
 ### Error Codes
