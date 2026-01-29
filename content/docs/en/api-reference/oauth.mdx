@@ -9,9 +9,59 @@ This document describes the API endpoints related to OAuth2 authorization code f
 
 ---
 
-## User Authorization
+## Authorization Entry (Frontend Redirect)
 
-Initiate OAuth2 authorization request to obtain an authorization code.
+For web applications, we recommend using the standard OAuth2 redirect approach to initiate authorization.
+
+```
+GET https://go.second.me/oauth/
+```
+
+### Description
+
+Redirect the user to this URL for login and authorization. After the user completes authorization, they will be redirected back to your `redirect_uri` with the authorization code in the URL.
+
+### Request Parameters
+
+Pass via URL Query parameters:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| client_id | string | Yes | Application's Client ID |
+| redirect_uri | string | Yes | Callback URL after authorization, must match app configuration |
+| response_type | string | Yes | Fixed value `code` |
+| state | string | Yes | CSRF protection parameter, use a random string |
+
+### URL Example
+
+```
+https://go.second.me/oauth/?client_id=your_client_id&redirect_uri=https://your-app.com/callback&response_type=code&state=abc123
+```
+
+### Callback Response
+
+On successful authorization, the user is redirected to:
+
+```
+https://your-app.com/callback?code=lba_ac_xxxxx...&state=abc123
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| code | string | Authorization code, valid for 5 minutes |
+| state | string | The state parameter returned as-is |
+
+On authorization failure:
+
+```
+https://your-app.com/callback?error=access_denied&error_description=User%20denied%20access&state=abc123
+```
+
+---
+
+## User Authorization (Server-side Endpoint)
+
+Server-side endpoint to initiate OAuth2 authorization request and obtain an authorization code. Suitable for scenarios where you already have the user's login session.
 
 ```
 POST /api/oauth/authorize/external

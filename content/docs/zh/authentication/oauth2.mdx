@@ -35,7 +35,57 @@ SecondMe API 使用标准的 OAuth2 授权码流程 (Authorization Code Flow)：
 
 ### 步骤 1: 发起授权请求
 
-引导用户访问 MindVerse 授权页面。你的服务端需要调用授权接口：
+引导用户访问 SecondMe 授权页面进行登录和授权。
+
+#### 方式 A: 前端重定向（推荐）
+
+对于 Web 应用，推荐使用标准的 OAuth2 重定向方式。将用户重定向到 SecondMe 授权页面：
+
+```
+https://go.second.me/oauth/?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&state=RANDOM_STATE
+```
+
+**授权 URL 参数:**
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| client_id | string | 是 | 应用的 Client ID |
+| redirect_uri | string | 是 | 授权后的回调 URL，必须与应用配置一致 |
+| response_type | string | 是 | 固定值 `code` |
+| state | string | 是 | CSRF 保护参数，建议使用随机字符串 |
+
+**前端示例代码:**
+
+```javascript
+// 构建授权 URL
+function buildAuthorizationUrl() {
+  const params = new URLSearchParams({
+    client_id: 'your_client_id',
+    redirect_uri: 'https://your-app.com/callback',
+    response_type: 'code',
+    state: generateRandomState()  // 生成随机 state 并存储用于验证
+  });
+  return `https://go.second.me/oauth/?${params.toString()}`;
+}
+
+// 发起授权 - 方式1: 直接跳转
+window.location.href = buildAuthorizationUrl();
+
+// 发起授权 - 方式2: 新窗口打开
+window.open(buildAuthorizationUrl(), '_blank');
+```
+
+用户在 SecondMe 完成登录和授权后，会被重定向回你的 `redirect_uri`，URL 中包含授权码：
+
+```
+https://your-app.com/callback?code=lba_ac_xxxxx...&state=your_state
+```
+
+> **重要**: 收到回调后，务必验证 `state` 参数与发起请求时存储的值一致，以防止 CSRF 攻击。
+
+#### 方式 B: 服务端直接调用（适用于已有用户登录态的场景）
+
+如果你的服务端已经拥有用户的登录态（Bearer Token），可以直接调用授权接口：
 
 ```bash
 curl -X POST "https://app.mindos.com/gate/lab/api/oauth/authorize/external" \

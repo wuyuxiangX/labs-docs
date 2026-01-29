@@ -35,7 +35,57 @@ Before you begin, you need to:
 
 ### Step 1: Initiate Authorization Request
 
-Guide the user to the MindVerse authorization page. Your server needs to call the authorization endpoint:
+Guide the user to the SecondMe authorization page for login and authorization.
+
+#### Option A: Frontend Redirect (Recommended)
+
+For web applications, we recommend using the standard OAuth2 redirect approach. Redirect the user to the SecondMe authorization page:
+
+```
+https://go.second.me/oauth/?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&state=RANDOM_STATE
+```
+
+**Authorization URL Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| client_id | string | Yes | Application's Client ID |
+| redirect_uri | string | Yes | Callback URL after authorization, must match app configuration |
+| response_type | string | Yes | Fixed value `code` |
+| state | string | Yes | CSRF protection parameter, use a random string |
+
+**Frontend Example Code:**
+
+```javascript
+// Build authorization URL
+function buildAuthorizationUrl() {
+  const params = new URLSearchParams({
+    client_id: 'your_client_id',
+    redirect_uri: 'https://your-app.com/callback',
+    response_type: 'code',
+    state: generateRandomState()  // Generate and store random state for verification
+  });
+  return `https://go.second.me/oauth/?${params.toString()}`;
+}
+
+// Initiate authorization - Option 1: Direct redirect
+window.location.href = buildAuthorizationUrl();
+
+// Initiate authorization - Option 2: Open in new window
+window.open(buildAuthorizationUrl(), '_blank');
+```
+
+After the user completes login and authorization on SecondMe, they will be redirected back to your `redirect_uri` with the authorization code in the URL:
+
+```
+https://your-app.com/callback?code=lba_ac_xxxxx...&state=your_state
+```
+
+> **Important**: Upon receiving the callback, always verify that the `state` parameter matches the value stored when initiating the request to prevent CSRF attacks.
+
+#### Option B: Server-side Direct Call (For scenarios with existing user session)
+
+If your server already has the user's login session (Bearer Token), you can directly call the authorization endpoint:
 
 ```bash
 curl -X POST "https://app.mindos.com/gate/lab/api/oauth/authorize/external" \

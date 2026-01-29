@@ -9,9 +9,59 @@ description: OAuth2 授权码流程相关的 API 接口详细文档
 
 ---
 
-## 用户授权
+## 授权入口（前端重定向）
 
-发起 OAuth2 授权请求，获取授权码。
+对于 Web 应用，推荐使用标准的 OAuth2 重定向方式发起授权。
+
+```
+GET https://go.second.me/oauth/
+```
+
+### 说明
+
+将用户重定向到此 URL 进行登录和授权。用户完成授权后，会被重定向回你的 `redirect_uri`，URL 中包含授权码。
+
+### 请求参数
+
+通过 URL Query 参数传递：
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| client_id | string | 是 | 应用的 Client ID |
+| redirect_uri | string | 是 | 授权后的回调 URL，必须与应用配置一致 |
+| response_type | string | 是 | 固定值 `code` |
+| state | string | 是 | CSRF 保护参数，建议使用随机字符串 |
+
+### URL 示例
+
+```
+https://go.second.me/oauth/?client_id=your_client_id&redirect_uri=https://your-app.com/callback&response_type=code&state=abc123
+```
+
+### 回调响应
+
+授权成功后，用户被重定向到：
+
+```
+https://your-app.com/callback?code=lba_ac_xxxxx...&state=abc123
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| code | string | 授权码，5 分钟内有效 |
+| state | string | 原样返回的 state 参数 |
+
+授权失败时：
+
+```
+https://your-app.com/callback?error=access_denied&error_description=User%20denied%20access&state=abc123
+```
+
+---
+
+## 用户授权（服务端接口）
+
+服务端直接发起 OAuth2 授权请求，获取授权码。适用于已有用户登录态的场景。
 
 ```
 POST /api/oauth/authorize/external
