@@ -27,8 +27,12 @@ const config = {
   async rewrites() {
     return [
       {
+        source: '/:lang/docs/:path*.mdx',
+        destination: '/:lang/llms.mdx/docs/:path*',
+      },
+      {
         source: '/docs/:path*.mdx',
-        destination: '/llms.mdx/docs/:path*',
+        destination: '/zh/llms.mdx/docs/:path*',
       },
     ];
   },

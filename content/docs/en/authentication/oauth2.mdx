@@ -44,7 +44,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/authorize/external" \
   -d '{
     "clientId": "your_client_id",
     "redirectUri": "https://your-app.com/callback",
-    "scope": ["user.info.name", "user.info.avatar", "chat"],
+    "scope": ["user.info", "chat"],
     "state": "random_state_for_csrf_protection"
   }'
 ```
@@ -104,7 +104,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/code" \
     "refreshToken": "lba_rt_xxxxx...",
     "tokenType": "Bearer",
     "expiresIn": 7200,
-    "scope": ["user.info.name", "user.info.avatar", "chat"]
+    "scope": ["user.info", "chat"]
   }
 }
 ```
@@ -150,7 +150,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
     "refreshToken": "lba_rt_new_token...",
     "tokenType": "Bearer",
     "expiresIn": 7200,
-    "scope": ["user.info.name", "user.info.avatar", "chat"]
+    "scope": ["user.info", "chat"]
   }
 }
 ```

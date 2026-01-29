@@ -67,8 +67,7 @@ paths:
               clientId: "your_client_id"
               redirectUri: "https://your-app.com/callback"
               scope:
-                - "user.info.name"
-                - "user.info.avatar"
+                - "user.info"
                 - "chat"
               state: "random_state_for_csrf_protection"
       responses:
@@ -752,8 +751,7 @@ components:
                 type: string
               description: List of granted permissions
               example:
-                - "user.info.name"
-                - "user.info.avatar"
+                - "user.info"
                 - "chat"
 
     # SecondMe Schemas

@@ -1,13 +1,7 @@
-import { source } from '@/lib/source';
+import { redirect } from 'next/navigation';
 
 export const revalidate = false;
 
 export async function GET() {
-  const lines: string[] = [];
-  lines.push('# Documentation');
-  lines.push('');
-  for (const page of source.getPages()) {
-    lines.push(`- [${page.data.title}](${page.url}): ${page.data.description}`);
-  }
-  return new Response(lines.join('\n'));
+  redirect('/zh/llms.txt');
 }
