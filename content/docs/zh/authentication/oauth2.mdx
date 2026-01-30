@@ -37,9 +37,7 @@ SecondMe API 使用标准的 OAuth2 授权码流程 (Authorization Code Flow)：
 
 引导用户访问 SecondMe 授权页面进行登录和授权。
 
-#### 方式 A: 前端重定向（推荐）
-
-对于 Web 应用，推荐使用标准的 OAuth2 重定向方式。将用户重定向到 SecondMe 授权页面：
+将用户重定向到 SecondMe 授权页面：
 
 ```
 https://go.second.me/oauth/?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&state=RANDOM_STATE
@@ -82,43 +80,6 @@ https://your-app.com/callback?code=lba_ac_xxxxx...&state=your_state
 ```
 
 > **重要**: 收到回调后，务必验证 `state` 参数与发起请求时存储的值一致，以防止 CSRF 攻击。
-
-#### 方式 B: 服务端直接调用（适用于已有用户登录态的场景）
-
-如果你的服务端已经拥有用户的登录态（Bearer Token），可以直接调用授权接口：
-
-```bash
-curl -X POST "https://app.mindos.com/gate/lab/api/oauth/authorize/external" \
-  -H "Authorization: Bearer <user_token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "clientId": "your_client_id",
-    "redirectUri": "https://your-app.com/callback",
-    "scope": ["user.info", "chat"],
-    "state": "random_state_for_csrf_protection"
-  }'
-```
-
-**请求参数:**
-
-| 参数 | 类型 | 必需 | 说明 |
-|------|------|------|------|
-| clientId | string | 是 | 应用的 Client ID |
-| redirectUri | string | 是 | 授权后的回调 URL |
-| scope | string[] | 是 | 请求的权限列表 |
-| state | string | 否 | CSRF 保护参数，建议使用 |
-
-**成功响应:**
-
-```json
-{
-  "code": 0,
-  "data": {
-    "code": "lba_ac_xxxxx...",
-    "state": "random_state_for_csrf_protection"
-  }
-}
-```
 
 ### 步骤 2: 用授权码换取 Token
 
