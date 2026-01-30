@@ -190,7 +190,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 {
   "code": 400,
   "message": "授权码无效或已过期",
-  "error_code": "oauth2.code.invalid"
+  "subCode": "oauth2.code.invalid"
 }
 ```
 
@@ -200,7 +200,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 {
   "code": 401,
   "message": "Client Secret 不匹配",
-  "error_code": "oauth2.client.secret_mismatch"
+  "subCode": "oauth2.client.secret_mismatch"
 }
 ```
 
@@ -210,7 +210,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 {
   "code": 400,
   "message": "Redirect URI 不匹配",
-  "error_code": "oauth2.redirect_uri.mismatch"
+  "subCode": "oauth2.redirect_uri.mismatch"
 }
 ```
 
@@ -220,7 +220,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 {
   "code": 401,
   "message": "Access Token 已过期",
-  "error_code": "oauth2.token.expired"
+  "subCode": "oauth2.token.expired"
 }
 ```
 

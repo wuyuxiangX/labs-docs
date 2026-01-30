@@ -274,7 +274,7 @@ All API errors follow a unified response format:
 {
   "code": 400,
   "message": "Error description",
-  "error_code": "oauth2.xxx.xxx"
+  "subCode": "oauth2.xxx.xxx"
 }
 ```
 
@@ -282,4 +282,4 @@ All API errors follow a unified response format:
 |-------|------|-------------|
 | code | number | HTTP status code |
 | message | string | Human-readable error description |
-| error_code | string | Machine-readable error code |
+| subCode | string | Machine-readable error code |

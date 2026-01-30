@@ -39,7 +39,6 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": {
     "name": "用户名",
     "email": "user@example.com",
@@ -100,7 +99,6 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/shades" \
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": {
     "shades": [
       {
@@ -196,7 +194,6 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/softmemory?keywor
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": {
     "list": [
       {
@@ -297,7 +294,6 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": {
     "noteId": 12345
   }
@@ -467,7 +463,6 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/list?appI
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": {
     "sessions": [
       {
@@ -542,7 +537,6 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/messages?
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": {
     "sessionId": "labs_sess_a1b2c3d4",
     "messages": [
@@ -591,8 +585,9 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/messages?
 | 错误码 | 说明 |
 |-------|------|
 | apikey.permission.denied | 缺少 chat 权限 |
-| secondme.session.not_found | 会话不存在 |
 | secondme.session.unauthorized | 无权访问该会话 |
+
+> **注意**: 如果 sessionId 不存在，接口会返回成功（code=0），但 messages 为空数组。
 
 ---
 
@@ -603,7 +598,6 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/messages?
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": { ... }
 }
 ```
@@ -614,6 +608,16 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/chat/session/messages?
 {
   "code": 403,
   "message": "缺少必需的权限",
-  "error_code": "apikey.permission.denied"
+  "subCode": "apikey.permission.denied"
+}
+```
+
+### 认证失败响应
+
+当 API Key 或 Token 无效时：
+
+```json
+{
+  "detail": "需要认证"
 }
 ```

@@ -274,7 +274,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 {
   "code": 400,
   "message": "错误描述",
-  "error_code": "oauth2.xxx.xxx"
+  "subCode": "oauth2.xxx.xxx"
 }
 ```
 
@@ -282,4 +282,4 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 |------|------|------|
 | code | number | HTTP 状态码 |
 | message | string | 人类可读的错误描述 |
-| error_code | string | 机器可读的错误码 |
+| subCode | string | 机器可读的错误码 |

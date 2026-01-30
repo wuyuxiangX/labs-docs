@@ -13,7 +13,7 @@ description: SecondMe API 可能返回的所有错误码列表
 {
   "code": 400,
   "message": "错误描述",
-  "error_code": "module.resource.reason"
+  "subCode": "module.resource.reason"
 }
 ```
 
@@ -21,7 +21,7 @@ description: SecondMe API 可能返回的所有错误码列表
 |------|------|------|
 | code | number | HTTP 状态码 |
 | message | string | 人类可读的错误描述 |
-| error_code | string | 机器可读的错误码 |
+| subCode | string | 机器可读的错误码 |
 
 ## 错误码命名规范
 
@@ -164,17 +164,17 @@ description: SecondMe API 可能返回的所有错误码列表
 - `4xx`: 客户端错误（参数错误、权限不足等）
 - `5xx`: 服务端错误
 
-### 2. 解析 error_code
+### 2. 解析 subCode
 
-使用 `error_code` 进行程序化错误处理：
+使用 `subCode` 进行程序化错误处理：
 
 ```python
 response = api_call()
 
-if response.get("error_code") == "oauth2.token.expired":
+if response.get("subCode") == "oauth2.token.expired":
     # 刷新 token
     refresh_token()
-elif response.get("error_code") == "apikey.permission.denied":
+elif response.get("subCode") == "apikey.permission.denied":
     # 提示用户权限不足
     show_permission_error()
 ```

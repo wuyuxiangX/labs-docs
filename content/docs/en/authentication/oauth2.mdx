@@ -229,7 +229,7 @@ You need to specify permission list when requesting authorization. Users can see
 {
   "code": 400,
   "message": "Authorization code is invalid or expired",
-  "error_code": "oauth2.code.invalid"
+  "subCode": "oauth2.code.invalid"
 }
 ```
 
@@ -239,7 +239,7 @@ You need to specify permission list when requesting authorization. Users can see
 {
   "code": 401,
   "message": "Client Secret does not match",
-  "error_code": "oauth2.client.secret_mismatch"
+  "subCode": "oauth2.client.secret_mismatch"
 }
 ```
 
@@ -249,7 +249,7 @@ You need to specify permission list when requesting authorization. Users can see
 {
   "code": 400,
   "message": "Redirect URI does not match",
-  "error_code": "oauth2.redirect_uri.mismatch"
+  "subCode": "oauth2.redirect_uri.mismatch"
 }
 ```
 
@@ -259,7 +259,7 @@ You need to specify permission list when requesting authorization. Users can see
 {
   "code": 401,
   "message": "Access Token has expired",
-  "error_code": "oauth2.token.expired"
+  "subCode": "oauth2.token.expired"
 }
 ```
 

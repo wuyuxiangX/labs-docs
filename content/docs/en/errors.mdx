@@ -13,7 +13,7 @@ All API errors follow a unified response format:
 {
   "code": 400,
   "message": "Error description",
-  "error_code": "module.resource.reason"
+  "subCode": "module.resource.reason"
 }
 ```
 
@@ -21,7 +21,7 @@ All API errors follow a unified response format:
 |-------|------|-------------|
 | code | number | HTTP status code |
 | message | string | Human-readable error description |
-| error_code | string | Machine-readable error code |
+| subCode | string | Machine-readable error code |
 
 ## Error Code Naming Convention
 
@@ -164,17 +164,17 @@ First check the HTTP status code to determine if the request was successful:
 - `4xx`: Client error (parameter error, permission denied, etc.)
 - `5xx`: Server error
 
-### 2. Parse error_code
+### 2. Parse subCode
 
-Use `error_code` for programmatic error handling:
+Use `subCode` for programmatic error handling:
 
 ```python
 response = api_call()
 
-if response.get("error_code") == "oauth2.token.expired":
+if response.get("subCode") == "oauth2.token.expired":
     # Refresh token
     refresh_token()
-elif response.get("error_code") == "apikey.permission.denied":
+elif response.get("subCode") == "apikey.permission.denied":
     # Show permission error to user
     show_permission_error()
 ```
