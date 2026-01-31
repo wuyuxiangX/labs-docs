@@ -165,6 +165,8 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/code" \
   -d "client_secret=your_client_secret"
 ```
 
+> **Note**: The request body must use `application/x-www-form-urlencoded` format. Do NOT use JSON format (`application/json`). Using the wrong format will result in a `Field required` validation error.
+
 **Request Parameters:**
 
 | Parameter | Type | Required | Description |
@@ -211,6 +213,8 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
   -d "client_id=your_client_id" \
   -d "client_secret=your_client_secret"
 ```
+
+> **Note**: The request body must use `application/x-www-form-urlencoded` format. Do NOT use JSON format (`application/json`). Using the wrong format will result in a `Field required` validation error.
 
 **Request Parameters:**
 

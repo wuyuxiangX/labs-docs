@@ -126,6 +126,8 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/code" \
   -d "client_secret=your_client_secret"
 ```
 
+> **注意**: 必须使用 `application/x-www-form-urlencoded` 格式发送请求体，不能使用 JSON 格式（`application/json`）。使用错误的格式会导致 `Field required` 验证错误。
+
 **请求参数:**
 
 | 参数 | 类型 | 必需 | 说明 |
@@ -172,6 +174,8 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
   -d "client_id=your_client_id" \
   -d "client_secret=your_client_secret"
 ```
+
+> **注意**: 必须使用 `application/x-www-form-urlencoded` 格式发送请求体，不能使用 JSON 格式（`application/json`）。使用错误的格式会导致 `Field required` 验证错误。
 
 **请求参数:**
 

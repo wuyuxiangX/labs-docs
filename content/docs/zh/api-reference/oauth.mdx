@@ -139,6 +139,8 @@ POST /api/oauth/token/code
 
 `Content-Type: application/x-www-form-urlencoded`
 
+> **注意**: 必须使用 `application/x-www-form-urlencoded` 格式发送请求体，不能使用 JSON 格式（`application/json`）。使用错误的格式会导致 `Field required` 验证错误。
+
 ### 请求参数
 
 | 参数 | 类型 | 必需 | 说明 |
@@ -214,6 +216,8 @@ POST /api/oauth/token/refresh
 ### 请求格式
 
 `Content-Type: application/x-www-form-urlencoded`
+
+> **注意**: 必须使用 `application/x-www-form-urlencoded` 格式发送请求体，不能使用 JSON 格式（`application/json`）。使用错误的格式会导致 `Field required` 验证错误。
 
 ### 请求参数
 
