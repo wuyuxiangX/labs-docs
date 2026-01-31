@@ -96,6 +96,102 @@ API Key 和 OAuth2 都需要指定权限范围：
 | `note.add` | 添加笔记和记忆 |
 | `chat` | 访问聊天功能 |
 
+## Next.js 全栈集成开发
+
+如果你正在使用 AI 编程助手（如 Claude、Cursor 等）开发 Next.js 全栈项目，可以点击页面顶部的按钮：
+
+- **Copy Dev Prompt** - 复制完整的开发指南，快速开始构建与 SecondMe API 集成的应用
+- **Copy Deploy Prompt** - 复制 Vercel 部署指南，包含环境变量设置和常见问题排查
+
+### 概述
+
+该 Prompt 引导你使用 Next.js 构建与 SecondMe API 集成的全栈项目，采用 OAuth2 标准授权流程，确保安全可靠的用户授权体验。
+
+### 工作流程
+
+1. **查阅官方文档** - 了解 API 功能和使用方式
+2. **注册应用** - 获取 OAuth2 凭证（Client ID、Client Secret）
+3. **提供配置信息** - 设置环境变量
+4. **确定功能需求** - 描述你想实现的产品功能
+5. **开始开发** - AI 将帮你构建完整项目
+
+### 技术栈
+
+- **框架：** Next.js 14+ (App Router)
+- **语言：** TypeScript
+- **样式：** Tailwind CSS
+- **API 调用：** fetch
+- **状态管理：** React hooks
+
+### 重要参考信息
+
+#### API 基础 URL
+
+```
+https://app.mindos.com/gate/lab
+```
+
+#### OAuth2 授权 URL
+
+```
+https://go.second.me/oauth/
+```
+
+#### OAuth2 流程
+
+```
+1. 用户点击登录 → 跳转到 SecondMe 授权页面
+2. 用户授权 → 重定向回你的应用（带 authorization_code）
+3. 后端用 code 换取 access_token 和 refresh_token
+4. 使用 access_token 调用 SecondMe API
+5. Token 过期时使用 refresh_token 刷新
+```
+
+#### Token 有效期
+
+| Token 类型 | 前缀 | 有效期 |
+|-----------|------|--------|
+| 授权码 | `lba_ac_` | 5 分钟 |
+| Access Token | `lba_at_` | 2 小时 |
+| Refresh Token | `lba_rt_` | 30 天 |
+
+#### 权限列表（Scopes）
+
+| 权限 | 说明 |
+|------|------|
+| `user.info` | 用户基础信息 |
+| `user.info.shades` | 用户兴趣标签 |
+| `user.info.softmemory` | 用户软记忆 |
+| `note.add` | 添加笔记 |
+| `chat` | 聊天功能 |
+
+#### API 响应格式
+
+所有 SecondMe API 响应都遵循统一格式：
+
+```json
+{
+  "code": 0,
+  "data": { ... }
+}
+```
+
+前端代码必须正确提取 `data` 字段内的数据：
+
+```typescript
+const response = await fetch('/api/secondme/user/shades');
+const result = await response.json();
+if (result.code === 0) {
+  const shades = result.data.shades;
+  shades.map(item => ...)
+}
+```
+
+### 开发注意事项
+
+- **State 参数**：可以直接忽略 `state` 参数验证
+- **CSS @import**：`@import` 语句必须放在 CSS 文件的最开头
+
 ## 下一步
 
 - [认证概述](/zh/docs/authentication) - 了解两种认证方式的详细区别

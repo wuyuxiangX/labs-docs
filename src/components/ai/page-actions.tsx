@@ -8,6 +8,34 @@ import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/
 
 const cache = new Map<string, string>();
 
+export function PromptCopyButton({
+  content,
+  label = 'Copy Prompt',
+}: {
+  content: string;
+  label?: string;
+}) {
+  const [checked, onClick] = useCopyButton(() => {
+    navigator.clipboard.writeText(content);
+  });
+
+  return (
+    <button
+      className={cn(
+        buttonVariants({
+          color: 'secondary',
+          size: 'sm',
+          className: 'gap-2 [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground',
+        }),
+      )}
+      onClick={onClick}
+    >
+      {checked ? <Check /> : <Copy />}
+      {label}
+    </button>
+  );
+}
+
 export function LLMCopyButton({
   /**
    * A URL to fetch the raw Markdown/MDX content of page
