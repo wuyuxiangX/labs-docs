@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Generate MeBot icon assets from source logo
+# Generate MeBot icon assets from SVG source logo
 # Usage: ./scripts/generate-icons.sh
 #
 # Prerequisites:
-# - Place mebot_logo.png (at least 512x512, preferably 600x600+) in /public/
-# - macOS with sips command available
+# - Place secondme_logo.svg in /public/
+# - Install librsvg: brew install librsvg
 #
 # This script generates:
 # - favicon-16x16.png
@@ -20,46 +20,48 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 PUBLIC_DIR="$PROJECT_ROOT/public"
-SOURCE_IMAGE="$PUBLIC_DIR/mebot_logo.png"
+SOURCE_SVG="$PUBLIC_DIR/secondme_logo.svg"
 
-# Check if source image exists
-if [ ! -f "$SOURCE_IMAGE" ]; then
-    echo "Error: Source image not found at $SOURCE_IMAGE"
-    echo "Please add mebot_logo.png (600x600 recommended) to the public directory first."
+# Check if source SVG exists
+if [ ! -f "$SOURCE_SVG" ]; then
+    echo "Error: Source SVG not found at $SOURCE_SVG"
+    echo "Please add secondme_logo.svg to the public directory first."
     exit 1
 fi
 
-echo "Generating icons from $SOURCE_IMAGE..."
+# Check if rsvg-convert is available
+if ! command -v rsvg-convert &> /dev/null; then
+    echo "Error: rsvg-convert not found."
+    echo "Please install librsvg first:"
+    echo "  brew install librsvg"
+    exit 1
+fi
+
+echo "Generating icons from $SOURCE_SVG..."
 
 # Create temporary directory for processing
 TEMP_DIR=$(mktemp -d)
 trap "rm -rf $TEMP_DIR" EXIT
 
-# Function to resize image using sips (macOS)
-resize_image() {
+# Function to resize SVG to PNG using rsvg-convert
+resize_svg() {
     local size=$1
     local output=$2
-    cp "$SOURCE_IMAGE" "$TEMP_DIR/temp.png"
-    sips -z $size $size "$TEMP_DIR/temp.png" --out "$output" > /dev/null 2>&1
+    rsvg-convert -w $size -h $size "$SOURCE_SVG" -o "$output"
     echo "Created: $output ($size x $size)"
 }
 
 # Generate PNG icons
-resize_image 16 "$PUBLIC_DIR/favicon-16x16.png"
-resize_image 32 "$PUBLIC_DIR/favicon-32x32.png"
-resize_image 180 "$PUBLIC_DIR/apple-touch-icon.png"
-resize_image 192 "$PUBLIC_DIR/icon-192x192.png"
-resize_image 512 "$PUBLIC_DIR/icon-512x512.png"
+resize_svg 16 "$PUBLIC_DIR/favicon-16x16.png"
+resize_svg 32 "$PUBLIC_DIR/favicon-32x32.png"
+resize_svg 180 "$PUBLIC_DIR/apple-touch-icon.png"
+resize_svg 192 "$PUBLIC_DIR/icon-192x192.png"
+resize_svg 512 "$PUBLIC_DIR/icon-512x512.png"
 
 # Generate multi-resolution favicon.ico
-# Using sips to create individual sizes, then combine with iconutil or just use the 32x32 as ico
-# For a proper .ico file with multiple sizes, we need additional tools
-# As a fallback, we'll create a simple .ico from the 32x32 version
-
-# Check if we have imagemagick for proper ico generation
 if command -v convert &> /dev/null; then
     echo "Using ImageMagick to create multi-resolution favicon.ico..."
-    resize_image 48 "$TEMP_DIR/favicon-48.png"
+    resize_svg 48 "$TEMP_DIR/favicon-48.png"
     convert "$PUBLIC_DIR/favicon-16x16.png" "$PUBLIC_DIR/favicon-32x32.png" "$TEMP_DIR/favicon-48.png" "$PUBLIC_DIR/favicon.ico"
     echo "Created: $PUBLIC_DIR/favicon.ico (16x16, 32x32, 48x48)"
 else

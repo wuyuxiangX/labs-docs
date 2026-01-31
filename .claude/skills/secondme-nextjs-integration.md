@@ -175,6 +175,45 @@ https://go.second.me/oauth/
 | `note.add` | 添加笔记 |
 | `chat` | 聊天功能 |
 
+### API 响应格式与处理
+
+**重要：所有 SecondMe API 响应都遵循统一格式：**
+
+```json
+{
+  "code": 0,
+  "data": { ... }  // 实际数据在 data 字段内
+}
+```
+
+**前端代码必须正确提取数据：**
+
+```typescript
+// ❌ 错误写法 - 直接使用响应会导致 .map is not a function
+const response = await fetch('/api/secondme/user/shades');
+const shades = await response.json();
+shades.map(item => ...)  // 错误！
+
+// ✅ 正确写法 - 提取 data 字段内的数据
+const response = await fetch('/api/secondme/user/shades');
+const result = await response.json();
+if (result.code === 0) {
+  const shades = result.data.shades;  // 正确！
+  shades.map(item => ...)
+}
+```
+
+**各 API 的数据路径：**
+
+| API | 数据路径 | 类型 |
+|-----|---------|------|
+| `/user/info` | `result.data` | object |
+| `/user/shades` | `result.data.shades` | array |
+| `/user/softmemory` | `result.data.list` | array |
+| `/chat/session/list` | `result.data.sessions` | array |
+| `/chat/session/messages` | `result.data.messages` | array |
+| `/note/add` | `result.data.noteId` | number |
+
 ---
 
 ## 开发注意事项
@@ -182,6 +221,25 @@ https://go.second.me/oauth/
 ### State 参数
 
 **直接忽略 `state` 参数验证。** 在回调处理时不需要验证 state，直接处理授权码即可。
+
+### CSS @import 规则顺序
+
+**重要：** 在 CSS 文件中，`@import` 语句必须放在文件的最开头（只能在 `@charset` 和 `@layer` 之后）。如果在其他 CSS 规则之后使用 `@import`，会导致解析错误。
+
+```css
+/* 正确写法 - @import 放在最前面 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap');
+
+:root {
+  --primary-color: #000;
+}
+
+/* 错误写法 - @import 不能放在其他规则之后 */
+:root {
+  --primary-color: #000;
+}
+@import url('...'); /* 这会报错！ */
+```
 
 ---
 
