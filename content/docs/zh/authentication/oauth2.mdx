@@ -15,6 +15,37 @@ SecondMe API 使用标准的 OAuth2 授权码流程 (Authorization Code Flow)：
 4. 你的应用用授权码换取 Access Token
 5. 使用 Access Token 调用 API
 
+## 授权流程时序图
+
+下图展示了完整的 OAuth2 授权码流程：
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant App as 第三方应用
+    participant Auth as SecondMe 授权页
+    participant API as SecondMe API
+
+    Note over U,API: 步骤 1: 发起授权请求
+    U->>App: 访问应用
+    App->>Auth: 重定向到授权页<br/>(client_id, redirect_uri, state)
+    U->>Auth: 登录并确认授权
+    Auth-->>App: 重定向回应用<br/>(code, state)
+
+    Note over U,API: 步骤 2: 换取 Token
+    App->>API: POST /oauth/token/code<br/>(code, client_secret)
+    API-->>App: 返回 access_token, refresh_token
+
+    Note over U,API: 步骤 3: 使用 Token
+    App->>API: 调用 API<br/>(Authorization: Bearer token)
+    API-->>App: 返回数据
+    App-->>U: 展示数据
+
+    Note over U,API: 步骤 4: 刷新 Token（可选）
+    App->>API: POST /oauth/token/refresh<br/>(refresh_token)
+    API-->>App: 返回新的 token
+```
+
 ## 前提条件
 
 在开始之前，你需要：
@@ -230,28 +261,11 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 
 Client Secret 必须保密，只能在服务端使用，不要在客户端代码中暴露。
 
-### 2. 使用 State 参数
-
-始终使用 `state` 参数防止 CSRF 攻击：
-
-```python
-import secrets
-
-# 生成随机 state
-state = secrets.token_urlsafe(32)
-# 存储到 session
-session['oauth_state'] = state
-
-# 授权回调时验证
-if request.args.get('state') != session.get('oauth_state'):
-    raise SecurityError("State mismatch")
-```
-
-### 3. 验证 Redirect URI
+### 2. 验证 Redirect URI
 
 确保 Redirect URI 使用 HTTPS，并且已在SecondMe后台注册。
 
-### 4. 安全存储 Token
+### 3. 安全存储 Token
 
 - 服务端存储时加密 Token
 - 不要在日志中记录 Token

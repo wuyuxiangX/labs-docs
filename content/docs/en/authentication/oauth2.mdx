@@ -15,6 +15,37 @@ SecondMe API uses the standard OAuth2 Authorization Code Flow:
 4. Your application exchanges the code for Access Token
 5. Use Access Token to call APIs
 
+## Authorization Flow Diagram
+
+The following diagram illustrates the complete OAuth2 Authorization Code Flow:
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant App as Third-party App
+    participant Auth as SecondMe Auth Page
+    participant API as SecondMe API
+
+    Note over U,API: Step 1: Initiate Authorization
+    U->>App: Visit app
+    App->>Auth: Redirect to auth page<br/>(client_id, redirect_uri, state)
+    U->>Auth: Login and authorize
+    Auth-->>App: Redirect back<br/>(code, state)
+
+    Note over U,API: Step 2: Exchange Code for Token
+    App->>API: POST /oauth/token/code<br/>(code, client_secret)
+    API-->>App: Return access_token, refresh_token
+
+    Note over U,API: Step 3: Use Access Token
+    App->>API: Call API<br/>(Authorization: Bearer token)
+    API-->>App: Return data
+    App-->>U: Display data
+
+    Note over U,API: Step 4: Refresh Token (Optional)
+    App->>API: POST /oauth/token/refresh<br/>(refresh_token)
+    API-->>App: Return new tokens
+```
+
 ## Prerequisites
 
 Before you begin, you need to:
@@ -269,28 +300,11 @@ You need to specify permission list when requesting authorization. Users can see
 
 Client Secret must be kept confidential and used only server-side. Never expose it in client-side code.
 
-### 2. Use State Parameter
-
-Always use the `state` parameter to prevent CSRF attacks:
-
-```python
-import secrets
-
-# Generate random state
-state = secrets.token_urlsafe(32)
-# Store in session
-session['oauth_state'] = state
-
-# Verify on callback
-if request.args.get('state') != session.get('oauth_state'):
-    raise SecurityError("State mismatch")
-```
-
-### 3. Validate Redirect URI
+### 2. Validate Redirect URI
 
 Ensure Redirect URI uses HTTPS and is registered in the Developer Console.
 
-### 4. Store Tokens Securely
+### 3. Store Tokens Securely
 
 - Encrypt tokens when storing server-side
 - Never log tokens

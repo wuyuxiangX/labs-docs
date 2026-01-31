@@ -280,6 +280,6 @@ curl -X POST "https://app.mindos.com/gate/lab/api/oauth/token/refresh" \
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| code | number | HTTP 状态码 |
+| code | number | 业务状态码，0 表示成功，非 0 表示错误 |
 | message | string | 人类可读的错误描述 |
 | subCode | string | 机器可读的错误码 |
