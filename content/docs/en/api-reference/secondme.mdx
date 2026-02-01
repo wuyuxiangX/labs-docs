@@ -40,6 +40,7 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
 {
   "code": 0,
   "data": {
+    "userId": "12345678",
     "name": "Username",
     "email": "user@example.com",
     "avatar": "https://cdn.example.com/avatar.jpg",
@@ -53,6 +54,7 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
 
 | Field | Type | Description |
 |-------|------|-------------|
+| userId | string | User ID |
 | name | string | User's name |
 | email | string | User's email |
 | avatar | string | Avatar URL |
@@ -311,6 +313,72 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
 | auth.scope.missing | Missing note.add permission |
 | note.content.required | TEXT type notes must provide content |
 | note.urls.required | LINK type notes must provide urls |
+
+---
+
+## Text-to-Speech (TTS)
+
+Convert text to speech audio.
+
+```
+POST /api/secondme/tts/generate
+```
+
+### Authentication
+
+Requires OAuth2 Token or API Key.
+
+### Required Permissions
+
+`voice`
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| text | string | Yes | Text to convert, max 10000 characters |
+| voice_id | string | Yes | Voice ID (preset or cloned voice) |
+| model | string | No | TTS model: `speech-2.6-hd` (default), `speech-02-hd` |
+| emotion | string | No | Emotion: `happy`/`sad`/`angry`/`fearful`/`disgusted`/`surprised`/`calm`/`fluent` (default) |
+| speed | number | No | Speed 0.5-2.0 (default 1.0) |
+| volume | number | No | Volume 0-10 (default 1.0) |
+| pitch | integer | No | Pitch -12 to 12 (default 0) |
+
+### Request Example
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/tts/generate" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Hello, this is a test speech",
+    "voice_id": "voice_001",
+    "model": "speech-2.6-hd",
+    "emotion": "fluent",
+    "speed": 1.0
+  }'
+```
+
+### Response
+
+Returns MP3 audio binary data.
+
+**HTTP Headers:**
+
+| Header | Description |
+|--------|-------------|
+| Content-Type | audio/mpeg |
+| Content-Disposition | Filename |
+| X-Audio-Duration-Ms | Audio duration in milliseconds |
+| X-Audio-Sample-Rate | Sample rate |
+
+### Error Codes
+
+| Error Code | Description |
+|------------|-------------|
+| apikey.permission.denied | Missing voice permission |
+| tts.text.too_long | Text exceeds 10000 character limit |
+| tts.voice.not_found | Voice ID does not exist |
 
 ---
 

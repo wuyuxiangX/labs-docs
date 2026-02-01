@@ -11,15 +11,7 @@ export const metadata: Metadata = {
   title: 'Second Me Documentation',
   description: 'Second Me (MeBot) Developer Documentation',
   icons: {
-    icon: [
-      { url: '/secondme_logo.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
-      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180' },
-    ],
+    icon: { url: '/secondme_logo.svg', type: 'image/svg+xml' },
   },
   manifest: '/manifest.json',
 };

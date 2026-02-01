@@ -40,6 +40,7 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
 {
   "code": 0,
   "data": {
+    "userId": "12345678",
     "name": "用户名",
     "email": "user@example.com",
     "avatar": "https://cdn.example.com/avatar.jpg",
@@ -53,6 +54,7 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
+| userId | string | 用户 ID |
 | name | string | 用户姓名 |
 | email | string | 用户邮箱 |
 | avatar | string | 头像 URL |
@@ -311,6 +313,72 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
 | auth.scope.missing | 缺少 note.add 权限 |
 | note.content.required | TEXT 类型笔记必须提供 content |
 | note.urls.required | LINK 类型笔记必须提供 urls |
+
+---
+
+## 语音合成 (TTS)
+
+将文本转换为语音音频。
+
+```
+POST /api/secondme/tts/generate
+```
+
+### 认证
+
+需要 OAuth2 Token 或 API Key。
+
+### 所需权限
+
+`voice`
+
+### 请求参数
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| text | string | 是 | 待转换的文本，最长 10000 字符 |
+| voice_id | string | 是 | 语音 ID（预置或克隆音色） |
+| model | string | 否 | TTS 模型：`speech-2.6-hd`（默认）、`speech-02-hd` |
+| emotion | string | 否 | 情绪：`happy`/`sad`/`angry`/`fearful`/`disgusted`/`surprised`/`calm`/`fluent`（默认） |
+| speed | number | 否 | 语速 0.5-2.0（默认 1.0） |
+| volume | number | 否 | 音量 0-10（默认 1.0） |
+| pitch | integer | 否 | 音调 -12 到 12（默认 0） |
+
+### 请求示例
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/tts/generate" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "你好，这是一段测试语音",
+    "voice_id": "voice_001",
+    "model": "speech-2.6-hd",
+    "emotion": "fluent",
+    "speed": 1.0
+  }'
+```
+
+### 响应
+
+返回 MP3 音频二进制数据。
+
+**HTTP Headers:**
+
+| Header | 说明 |
+|--------|------|
+| Content-Type | audio/mpeg |
+| Content-Disposition | 文件名 |
+| X-Audio-Duration-Ms | 音频时长（毫秒） |
+| X-Audio-Sample-Rate | 采样率 |
+
+### 错误码
+
+| 错误码 | 说明 |
+|-------|------|
+| apikey.permission.denied | 缺少 voice 权限 |
+| tts.text.too_long | 文本超过 10000 字符限制 |
+| tts.voice.not_found | 语音 ID 不存在 |
 
 ---
 
