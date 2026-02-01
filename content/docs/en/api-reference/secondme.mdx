@@ -337,12 +337,9 @@ Requires OAuth2 Token or API Key.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | text | string | Yes | Text to convert, max 10000 characters |
-| voice_id | string | Yes | Voice ID (preset or cloned voice) |
-| model | string | No | TTS model: `speech-2.6-hd` (default), `speech-02-hd` |
 | emotion | string | No | Emotion: `happy`/`sad`/`angry`/`fearful`/`disgusted`/`surprised`/`calm`/`fluent` (default) |
-| speed | number | No | Speed 0.5-2.0 (default 1.0) |
-| volume | number | No | Volume 0-10 (default 1.0) |
-| pitch | integer | No | Pitch -12 to 12 (default 0) |
+
+> **Note**: Voice ID is automatically retrieved from user info (voiceId field). Users must set up their voice in SecondMe before using the TTS feature.
 
 ### Request Example
 
@@ -352,10 +349,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/tts/generate" \
   -H "Content-Type: application/json" \
   -d '{
     "text": "Hello, this is a test speech",
-    "voice_id": "voice_001",
-    "model": "speech-2.6-hd",
-    "emotion": "fluent",
-    "speed": 1.0
+    "emotion": "fluent"
   }'
 ```
 
@@ -378,7 +372,7 @@ Returns MP3 audio binary data.
 |------------|-------------|
 | apikey.permission.denied | Missing voice permission |
 | tts.text.too_long | Text exceeds 10000 character limit |
-| tts.voice.not_found | Voice ID does not exist |
+| tts.voice_id.not_set | User has not set up voice |
 
 ---
 

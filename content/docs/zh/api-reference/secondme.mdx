@@ -337,12 +337,9 @@ POST /api/secondme/tts/generate
 | 参数 | 类型 | 必需 | 说明 |
 |------|------|------|------|
 | text | string | 是 | 待转换的文本，最长 10000 字符 |
-| voice_id | string | 是 | 语音 ID（预置或克隆音色） |
-| model | string | 否 | TTS 模型：`speech-2.6-hd`（默认）、`speech-02-hd` |
 | emotion | string | 否 | 情绪：`happy`/`sad`/`angry`/`fearful`/`disgusted`/`surprised`/`calm`/`fluent`（默认） |
-| speed | number | 否 | 语速 0.5-2.0（默认 1.0） |
-| volume | number | 否 | 音量 0-10（默认 1.0） |
-| pitch | integer | 否 | 音调 -12 到 12（默认 0） |
+
+> **注意**: 语音 ID 自动从用户信息中获取（voiceId 字段）。如需使用 TTS 功能，用户需先在 SecondMe 中设置语音。
 
 ### 请求示例
 
@@ -352,10 +349,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/tts/generate" \
   -H "Content-Type: application/json" \
   -d '{
     "text": "你好，这是一段测试语音",
-    "voice_id": "voice_001",
-    "model": "speech-2.6-hd",
-    "emotion": "fluent",
-    "speed": 1.0
+    "emotion": "fluent"
   }'
 ```
 
@@ -378,7 +372,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/tts/generate" \
 |-------|------|
 | apikey.permission.denied | 缺少 voice 权限 |
 | tts.text.too_long | 文本超过 10000 字符限制 |
-| tts.voice.not_found | 语音 ID 不存在 |
+| tts.voice_id.not_set | 用户未设置语音 |
 
 ---
 
