@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { i18n } from '@/lib/i18n';
 import { RootProvider } from 'fumadocs-ui/provider/next';
+import { LanguageDetector } from '@/components/LanguageDetector';
 
 export default async function LangLayout({
   children,
@@ -21,6 +22,7 @@ export default async function LangLayout({
         })),
       }}
     >
+      <LanguageDetector />
       <div lang={lang} dir="ltr">
         {children}
       </div>
