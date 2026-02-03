@@ -1010,6 +1010,10 @@ components:
         receiverUserId:
           type: integer
           description: Receiver user ID (reserved field)
+        enableWebSearch:
+          type: boolean
+          description: Enable web search, defaults to false
+          default: false
 
     SessionListResponse:
       type: object

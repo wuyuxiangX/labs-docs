@@ -419,6 +419,7 @@ POST /api/secondme/chat/stream
 | appId | string | 否 | 应用 ID，优先级高于 Header |
 | systemPrompt | string | 否 | 系统提示词，仅在新会话首次有效 |
 | receiverUserId | number | 否 | 接收方用户 ID（预留字段） |
+| enableWebSearch | boolean | 否 | 是否启用网页搜索，默认 false |
 
 ### 请求示例
 
@@ -429,6 +430,18 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/chat/stream" \
   -d '{
     "message": "你好，介绍一下自己",
     "systemPrompt": "请用友好的语气回复"
+  }'
+```
+
+**启用 WebSearch:**
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/chat/stream" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "今天有什么科技新闻",
+    "enableWebSearch": true
   }'
 ```
 
@@ -456,11 +469,30 @@ data: {"choices": [{"delta": {"content": "你的 AI 分身"}}]}
 data: [DONE]
 ```
 
+**启用 WebSearch 时的事件流:**
+
+```
+event: session
+data: {"sessionId": "labs_sess_a1b2c3d4e5f6"}
+
+event: tool_call
+data: {"toolName": "web_search", "status": "searching"}
+
+event: tool_result
+data: {"toolName": "web_search", "query": "科技新闻", "resultCount": 5}
+
+data: {"choices": [{"delta": {"content": "根据搜索结果..."}}]}
+
+data: [DONE]
+```
+
 ### 流数据格式
 
 | 事件类型 | 说明 |
 |---------|------|
 | session | 新会话创建时返回会话 ID |
+| tool_call | 工具调用开始，启用 WebSearch 时触发 |
+| tool_result | 工具调用结果，包含搜索查询和结果数量 |
 | data | 聊天内容增量 |
 | [DONE] | 流结束标志 |
 

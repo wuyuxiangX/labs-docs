@@ -419,6 +419,7 @@ Requires OAuth2 Token or API Key.
 | appId | string | No | Application ID, takes priority over Header |
 | systemPrompt | string | No | System prompt, only effective on first request of new session |
 | receiverUserId | number | No | Receiver user ID (reserved field) |
+| enableWebSearch | boolean | No | Enable web search, defaults to false |
 
 ### Request Example
 
@@ -429,6 +430,18 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/chat/stream" \
   -d '{
     "message": "Hello, introduce yourself",
     "systemPrompt": "Please reply in a friendly tone"
+  }'
+```
+
+**With WebSearch enabled:**
+
+```bash
+curl -X POST "https://app.mindos.com/gate/lab/api/secondme/chat/stream" \
+  -H "Authorization: Bearer lba_ak_your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What are today tech news",
+    "enableWebSearch": true
   }'
 ```
 
@@ -456,11 +469,30 @@ data: {"choices": [{"delta": {"content": " your AI avatar"}}]}
 data: [DONE]
 ```
 
+**Event stream when WebSearch is enabled:**
+
+```
+event: session
+data: {"sessionId": "labs_sess_a1b2c3d4e5f6"}
+
+event: tool_call
+data: {"toolName": "web_search", "status": "searching"}
+
+event: tool_result
+data: {"toolName": "web_search", "query": "tech news", "resultCount": 5}
+
+data: {"choices": [{"delta": {"content": "Based on search results..."}}]}
+
+data: [DONE]
+```
+
 ### Stream Data Format
 
 | Event Type | Description |
 |------------|-------------|
 | session | Returns session ID when new session is created |
+| tool_call | Tool call started, triggered when WebSearch is enabled |
+| tool_result | Tool call result, contains search query and result count |
 | data | Incremental chat content |
 | [DONE] | End of stream marker |
 
