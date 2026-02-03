@@ -46,8 +46,8 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
     "avatar": "https://cdn.example.com/avatar.jpg",
     "bio": "Personal bio",
     "selfIntroduction": "Self introduction content",
-    "voiceId": "voice_001",
-    "profileCompleteness": 85
+    "profileCompleteness": 85,
+    "route": "username"
   }
 }
 ```
@@ -60,8 +60,8 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
 | avatar | string | Avatar URL |
 | bio | string | Personal bio |
 | selfIntroduction | string | Self introduction |
-| voiceId | string | Voice ID |
 | profileCompleteness | number | Profile completeness (0-100) |
+| route | string | User's profile route |
 
 ### Error Codes
 
@@ -318,7 +318,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
 
 ## Text-to-Speech (TTS)
 
-Convert text to speech audio.
+Convert text to speech audio and return a public URL for the audio file.
 
 ```
 POST /api/secondme/tts/generate
@@ -339,7 +339,7 @@ Requires OAuth2 Token or API Key.
 | text | string | Yes | Text to convert, max 10000 characters |
 | emotion | string | No | Emotion: `happy`/`sad`/`angry`/`fearful`/`disgusted`/`surprised`/`calm`/`fluent` (default) |
 
-> **Note**: Voice ID is automatically retrieved from user info (voiceId field). Users must set up their voice in SecondMe before using the TTS feature.
+> **Note**: Voice ID is automatically retrieved from user info. Users must set up their voice in SecondMe before using the TTS feature.
 
 ### Request Example
 
@@ -355,16 +355,26 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/tts/generate" \
 
 ### Response
 
-Returns MP3 audio binary data.
+**Success (200)**
 
-**HTTP Headers:**
+```json
+{
+  "code": 0,
+  "data": {
+    "url": "https://cdn.example.com/tts/audio_12345.mp3",
+    "durationMs": 2500,
+    "sampleRate": 24000,
+    "format": "mp3"
+  }
+}
+```
 
-| Header | Description |
-|--------|-------------|
-| Content-Type | audio/mpeg |
-| Content-Disposition | Filename |
-| X-Audio-Duration-Ms | Audio duration in milliseconds |
-| X-Audio-Sample-Rate | Sample rate |
+| Field | Type | Description |
+|-------|------|-------------|
+| url | string | Audio file URL (public read, permanently valid) |
+| durationMs | number | Audio duration in milliseconds |
+| sampleRate | number | Sample rate (Hz) |
+| format | string | Audio format |
 
 ### Error Codes
 

@@ -46,8 +46,8 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
     "avatar": "https://cdn.example.com/avatar.jpg",
     "bio": "个人简介",
     "selfIntroduction": "自我介绍内容",
-    "voiceId": "voice_001",
-    "profileCompleteness": 85
+    "profileCompleteness": 85,
+    "route": "username"
   }
 }
 ```
@@ -60,8 +60,8 @@ curl -X GET "https://app.mindos.com/gate/lab/api/secondme/user/info" \
 | avatar | string | 头像 URL |
 | bio | string | 个人简介 |
 | selfIntroduction | string | 自我介绍 |
-| voiceId | string | 语音 ID |
 | profileCompleteness | number | 资料完整度（0-100） |
+| route | string | 用户主页路由 |
 
 ### 错误码
 
@@ -318,7 +318,7 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/note/add" \
 
 ## 语音合成 (TTS)
 
-将文本转换为语音音频。
+将文本转换为语音音频，返回音频文件的公开 URL。
 
 ```
 POST /api/secondme/tts/generate
@@ -339,7 +339,7 @@ POST /api/secondme/tts/generate
 | text | string | 是 | 待转换的文本，最长 10000 字符 |
 | emotion | string | 否 | 情绪：`happy`/`sad`/`angry`/`fearful`/`disgusted`/`surprised`/`calm`/`fluent`（默认） |
 
-> **注意**: 语音 ID 自动从用户信息中获取（voiceId 字段）。如需使用 TTS 功能，用户需先在 SecondMe 中设置语音。
+> **注意**: 语音 ID 自动从用户信息中获取。如需使用 TTS 功能，用户需先在 SecondMe 中设置语音。
 
 ### 请求示例
 
@@ -355,16 +355,26 @@ curl -X POST "https://app.mindos.com/gate/lab/api/secondme/tts/generate" \
 
 ### 响应
 
-返回 MP3 音频二进制数据。
+**成功 (200)**
 
-**HTTP Headers:**
+```json
+{
+  "code": 0,
+  "data": {
+    "url": "https://cdn.example.com/tts/audio_12345.mp3",
+    "durationMs": 2500,
+    "sampleRate": 24000,
+    "format": "mp3"
+  }
+}
+```
 
-| Header | 说明 |
-|--------|------|
-| Content-Type | audio/mpeg |
-| Content-Disposition | 文件名 |
-| X-Audio-Duration-Ms | 音频时长（毫秒） |
-| X-Audio-Sample-Rate | 采样率 |
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| url | string | 音频文件 URL（公有读，永久有效） |
+| durationMs | number | 音频时长（毫秒） |
+| sampleRate | number | 采样率 (Hz) |
+| format | string | 音频格式 |
 
 ### 错误码
 
